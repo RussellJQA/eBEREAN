@@ -34,8 +34,8 @@ chapter_files = sorted(glob.glob(os.path.join(source_files, "*.txt")))
 # sorted() because glob() may return the list in an arbitrary order
 for chapter_file in chapter_files:
 
-    fn = open(chapter_file, "r")
-    lines = fn.readlines()
+    read_file = open(chapter_file, "r")
+    lines = read_file.readlines()
     full_book_name = lines[0][3:]
     verse_count = len(lines) - 2  # Exclude lines[0] and lines [1]
     # No need to exclude the blank line at the end of chapter files,

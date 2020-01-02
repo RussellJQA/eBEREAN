@@ -1,5 +1,6 @@
 import datetime
 import calendar
+import json
 
 from bible_data import bible_books, weekend_psalm_readings, weekday_psalm_readings
 
@@ -35,17 +36,22 @@ def process_reading(date, book_abbr, reference, datedelta, merge_refs=False):
         last_book_abbr = last_full_ref[0 : last_full_ref.find(" ")]
 
         if last_book_abbr == book_abbr:
-            daily_readings[cal_date][-1] += "-" + reference
-            # Concatenate new reference to old reference, with a dash separating
-            # TODO: Need to update this to properly merge OT split chapter references:
-            #   Num 6-7:1-47        => Num 6-7:47
-            #   Num 7:48-89-8       => Num 7:48-89;8 {or better, Num 7:48-8:26}
-            #   1Ch 6:1-48-6:49-81  => 1Ch 6:1-81 {or better, just 1Ch 6}
-            #   Ezr 2:1-36-2:37-70  => Ezr 2:1-70 {or better, just Ezr 2}
-            #   Neh 7:1-38-7:39-73  => Neh 7:1-73 {or better, just Neh 7}
-            # {Hint 1: Use regular expressions to match ref1/ref2 patterns.}
-            # {Hint 2: For "better", lookup chapter length (in verses) for ref2.}
-            # For now, I just hand-tweaked these in any output files
+
+            with open("verse_counts_by_chapter.json", "r") as read_file:
+                verse_counts_by_chapter = json.load(read_file)
+                # print(verse_counts_by_chapter)
+
+                daily_readings[cal_date][-1] += "-" + reference
+                # Concatenate new reference to old reference, with a dash separating
+                # TODO: Need to update this to properly merge OT split chapter refs:
+                #   Num 6-7:1-47        => Num 6-7:47
+                #   Num 7:48-89-8       => Num 7:48-89;8 {or better, Num 7:48-8:26}
+                #   1Ch 6:1-48-6:49-81  => 1Ch 6:1-81 {or better, just 1Ch 6}
+                #   Ezr 2:1-36-2:37-70  => Ezr 2:1-70 {or better, just Ezr 2}
+                #   Neh 7:1-38-7:39-73  => Neh 7:1-73 {or better, just Neh 7}
+                # {Hint 1: Use regular expressions to match ref1/ref2 patterns.}
+                # {Hint 2: For "better", lookup chapter length (in verses) for ref2.}
+                # For now, I just hand-tweaked these in any output files
 
         else:
             daily_readings[cal_date][-1] += "-" + full_ref
