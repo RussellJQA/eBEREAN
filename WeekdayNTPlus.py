@@ -44,11 +44,11 @@ def process_reading(date, book_abbr, reference, datedelta, merge_refs=False):
                 daily_readings[cal_date][-1] += "-" + reference
                 # Concatenate new reference to old reference, with a dash separating
                 # TODO: Need to update this to properly merge OT split chapter refs:
-                #   Num 6-7:1-47        => Num 6-7:47
-                #   Num 7:48-89-8       => Num 7:48-89;8 {or better, Num 7:48-8:26}
-                #   1Ch 6:1-48-6:49-81  => 1Ch 6:1-81 {or better, just 1Ch 6}
-                #   Ezr 2:1-36-2:37-70  => Ezr 2:1-70 {or better, just Ezr 2}
-                #   Neh 7:1-38-7:39-73  => Neh 7:1-73 {or better, just Neh 7}
+                #   Num 6-7:1-47        => Num 6-7:47   (3/2)
+                #   Num 7:48-89-8       => Num 7:48-89;8 {better: Num 7:48-8:26} (3/3)
+                #   1Ch 6:1-48-6:49-81  => 1Ch 6:1-81 {better: just 1Ch 6}  {6/21}
+                #   Ezr 2:1-36-2:37-70  => Ezr 2:1-70 {better: just Ezr 2}  {7/22}
+                #   Neh 7:1-38-7:39-73  => Neh 7:1-73 {better: just Neh 7}  {7/30}
                 # {Hint 1: Use regular expressions to match ref1/ref2 patterns.}
                 # {Hint 2: For "better", lookup chapter length (in verses) for ref2.}
                 # For now, I just hand-tweaked these in any output files
@@ -254,8 +254,10 @@ def main():
         if month != previous_month:  # Month changed
             print(f"\n\t{calendar.month_name[int(month)]} 2020\n")
             previous_month = month
-        print(cal_date[3:] + ":", ", ".join(full_refs))
-        # 29 Tue: Psa 150, Rev 22, Mal 3-4
+        print("□ " + cal_date[3:] + ":", ", ".join(full_refs))
+        # □ 28 Mon: Psa 149:6-9, Rev 19, Zec 11-12
+        if (cal_date[6:9] == "Sat"):
+            print("------------------------------------------------------------")
 
 
 if __name__ == "__main__":
