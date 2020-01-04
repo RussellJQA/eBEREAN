@@ -1,8 +1,15 @@
-import datetime
 import calendar
-import json
+import datetime
 
 from bible_data import bible_books, weekend_psalm_readings, weekday_psalm_readings
+from create_bible_plan import (
+    get_weekday,
+    get_weekday_delta,
+    print_daily_reading,
+    process_reading,
+)
+
+# from create_play_list import create_play_list
 
 bible_books_list = list(bible_books.keys())
 
@@ -10,66 +17,8 @@ solomon = ["Proverbs", "Ecclesiastes", "Song of Solomon"]
 # Solomon's Proverbial wisdom, the wisdom of the Preacher, and Wisdom and His Wife
 # ('Wisdom' being 'One Wiser than Solomon' )
 
-daily_readings = {}
 
-
-def get_weekday(date):
-    return date.strftime("%a")
-
-
-def get_weekday_delta(date):
-    day_of_week = date.strftime("%a")
-    if day_of_week == "Fri":
-        return 3
-    elif day_of_week == "Sat":
-        return 2
-    else:
-        return 1
-
-
-def process_reading(date, book_abbr, reference, datedelta, merge_refs=False):
-    cal_date = date.strftime("%m/%d %a")
-    full_ref = book_abbr + " " + reference
-
-    def do_merge_refs():
-        last_full_ref = daily_readings[cal_date][-1]
-        last_book_abbr = last_full_ref[0 : last_full_ref.find(" ")]
-
-        if last_book_abbr == book_abbr:
-
-            with open("verse_counts_by_chapter.json", "r") as read_file:
-                verse_counts_by_chapter = json.load(read_file)
-                # print(verse_counts_by_chapter)
-
-                daily_readings[cal_date][-1] += "-" + reference
-                # Concatenate new reference to old reference, with a dash separating
-                # TODO: Need to update this to properly merge OT split chapter refs:
-                #   Num 6-7:1-47        => Num 6-7:47   (3/2)
-                #   Num 7:48-89-8       => Num 7:48-89;8 {better: Num 7:48-8:26} (3/3)
-                #   1Ch 6:1-48-6:49-81  => 1Ch 6:1-81 {better: just 1Ch 6}  {6/21}
-                #   Ezr 2:1-36-2:37-70  => Ezr 2:1-70 {better: just Ezr 2}  {7/22}
-                #   Neh 7:1-38-7:39-73  => Neh 7:1-73 {better: just Neh 7}  {7/30}
-                # {Hint 1: Use regular expressions to match ref1/ref2 patterns.}
-                # {Hint 2: For "better", lookup chapter length (in verses) for ref2.}
-                # For now, I just hand-tweaked these in any output files
-
-        else:
-            daily_readings[cal_date][-1] += "-" + full_ref
-            # Concatenate new full_ref to old full_ref, with a dash separating
-
-    if cal_date in daily_readings:
-        if merge_refs:
-            do_merge_refs()
-        else:
-            daily_readings[cal_date].append(full_ref)
-            # Append new full_ref to list of daily readings for this day
-    else:
-        daily_readings[cal_date] = [full_ref]  # Insert 1st reading for this day
-
-    return date + datetime.timedelta(days=datedelta)
-
-
-def WeekdayPsalms(year):  # Weekday Worship (Psalms)
+def WeekdayPsalms(daily_readings, year):  # Weekday Worship (Psalms)
     date = datetime.datetime(year, 1, 1)  # January 1
     while date.strftime("%a") in ("Sat", "Sun"):
         date += datetime.timedelta(days=1)  # Increment until first weekday
@@ -85,10 +34,15 @@ def WeekdayPsalms(year):  # Weekday Worship (Psalms)
     # print(f'For {year}, {extra_readings} extra WeekdayPsalms() readings are needed.')
 
     for count, psalm_ref in enumerate(weekday_psalm_readings):
-        date = process_reading(date, "Psa", psalm_ref, get_weekday_delta(date))
+        datedelta = get_weekday_delta(date)
+        (daily_readings, date) = process_reading(
+            daily_readings, date, "Psa", psalm_ref, datedelta
+        )
+
+    return daily_readings
 
 
-def WeekendPsalms(year):  # Weekend Worship (Psalms)
+def WeekendPsalms(daily_readings, year):  # Weekend Worship (Psalms)
     date = datetime.datetime(year, 1, 1)  # January 1
     while get_weekday(date) not in ("Sat", "Sun"):
         date += datetime.timedelta(days=1)  # Increment until first weekend day
@@ -104,12 +58,17 @@ def WeekendPsalms(year):  # Weekend Worship (Psalms)
     # print(f'For {year}, {extra_readings} extra WeekendPsalms() readings are needed.')
 
     for count, psalm_ref in enumerate(weekend_psalm_readings):
-        date = process_reading(date, "Psa", psalm_ref, (6 if (count % 2) else 1))
+        datedelta = 6 if (count % 2) else 1
         # If date is a Lord's Day, then increment date to the following Saturday
         # Else {date is a Saturday} increment date to the next day (a Lord's Day)
+        (daily_readings, date) = process_reading(
+            daily_readings, date, "Psa", psalm_ref, datedelta
+        )
+
+    return daily_readings
 
 
-def WeekdayNT(year):  # Weekday New Testament
+def WeekdayNT(daily_readings, year):  # Weekday New Testament
     date = datetime.datetime(year, 1, 1)  # January 1
     while date.strftime("%a") in ("Sat", "Sun"):
         date += datetime.timedelta(days=1)  # Increment until first weekday
@@ -149,10 +108,16 @@ def WeekdayNT(year):  # Weekday New Testament
     readings = get_readings(get_num_extra_readings())
     for reading in readings:
         book_abbr, chapter = reading.split()
-        date = process_reading(date, book_abbr, chapter, get_weekday_delta(date))
+        datedelta = get_weekday_delta(date)
+        (daily_readings, date) = process_reading(
+            daily_readings, date, book_abbr, chapter, datedelta
+        )
+
+    return daily_readings
 
 
-def OTMain(year):  # Daily OT Duo (OT without Psalms and without Solomon's Writings)
+def OTMain(daily_readings, year):
+    # Daily OT Duo (OT without Psalms and without Solomon's Writings)
     date = datetime.datetime(year, 1, 1)  # January 1
 
     substitutions = [
@@ -195,10 +160,14 @@ def OTMain(year):  # Daily OT Duo (OT without Psalms and without Solomon's Writi
         book_abbr, chapter = reading.split()
         datedelta = 0 if (chapter_count % 2) else 1  # Increment on every other chapter
         merge_refs = not (chapter_count % 2)  # Merge references on every other chapter
-        date = process_reading(date, book_abbr, chapter, datedelta, merge_refs)
+        (daily_readings, date) = process_reading(
+            daily_readings, date, book_abbr, chapter, datedelta, merge_refs
+        )
+
+    return daily_readings
 
 
-def WeeklyWisdom(year, day_of_week):  # Weekly Wisdom
+def WeeklyWisdom(daily_readings, year, day_of_week):  # Weekly Wisdom
     # Solomon's Proverbial wisdom, the wisdom of the Preacher, and Wisdom and His Wife
     # ('Wisdom' being 'One Wiser than Solomon' )
 
@@ -234,39 +203,28 @@ def WeeklyWisdom(year, day_of_week):  # Weekly Wisdom
     readings = get_readings(get_num_extra_readings())
     for reading in readings:
         book_abbr, chapter = reading.split()
-        date = process_reading(date, book_abbr, chapter, 7)
+        (daily_readings, date) = process_reading(
+            daily_readings, date, book_abbr, chapter, 7
+        )
 
-
-def print_daily_reading(cal_date, previous_month,full_refs):
-
-    month = cal_date[0:2]
-    if month != previous_month:  # Month changed
-        print(f"\n\t{calendar.month_name[int(month)]} 2020\n")
-        previous_month = month
-
-    print("□ " + cal_date[3:] + ":", ", ".join(full_refs))
-    # □ 28 Mon: Psa 149:6-9, Rev 19, Zec 11-12
-
-    if (cal_date[6:9] == "Sat"):
-        print("------------------------------------------------------------")
-
-    return previous_month
+    return daily_readings
 
 
 def main():
+    daily_readings = {}
     YEAR = 2020
-    WeekdayPsalms(YEAR)
-    WeekendPsalms(YEAR)
-    WeekdayNT(YEAR)
-    OTMain(YEAR)
-    WeeklyWisdom(YEAR, "Sat")  # Saturdays with Solomon
+    WeekdayPsalms(daily_readings, YEAR)
+    WeekendPsalms(daily_readings, YEAR)
+    WeekdayNT(daily_readings, YEAR)
+    OTMain(daily_readings, YEAR)
+    WeeklyWisdom(daily_readings, YEAR, "Sat")  # Saturdays with Solomon
 
     # for cal_date, full_refs in sorted(daily_readings.items()):
     #     print(cal_date, full_refs)  # Useful for debugging
 
     previous_month = ""
     for cal_date, full_refs in sorted(daily_readings.items()):
-        previous_month = print_daily_reading(cal_date, previous_month,full_refs)
+        previous_month = print_daily_reading(cal_date, previous_month, full_refs)
         # create_play_list(cal_date, full_refs)
 
 
