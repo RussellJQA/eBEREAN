@@ -1,12 +1,6 @@
-# with open("Playlist.m3u8", "w") as write_file:
-#     write_file.write("#EXTM3U\n")
-#     write_file.write("#EXTINF:-1,unknown - 19_psalms_002\n")
-#     write_file.write("/storage/emulated/0/Music/Bible-Audio/19_psalms/19_psalms_002.mp3\n")
-#     write_file.write("#EXTINF:-1,unknown - 40_Matthew_03\n")
-#     write_file.write("/storage/emulated/0/Music/Bible-Audio/40_matthew/40_Matthew_03.mp3\n")
-#     write_file.write("#EXTINF:237,<unknown> - 01_genesis_005\n")
-#     write_file.write("/storage/emulated/0/Music/Bible-Audio/01_genesis/01_genesis_005.mp3\n")
-#     write_file.write("#EXTINF:244,<unknown")
+"""
+Create a daily MP3 playlist for each day in a Bible reading plan.
+"""
 
 from bible_books import bible_books
 
@@ -36,3 +30,13 @@ def create_play_list(cal_date, full_refs):
             write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
             write_file.write(path + book_number_and_name + "/" + reading + ".mp3\n")
         write_file.write("#EXTINF:244,<unknown")
+
+# with open("Playlist.m3u8", "w") as write_file:
+#     write_file.write("#EXTM3U\n")
+#     write_file.write("#EXTINF:-1,unknown - 19_psalms_002\n")
+#     write_file.write("/storage/emulated/0/Music/Bible-Audio/19_psalms/19_psalms_002.mp3\n")
+#     write_file.write("#EXTINF:-1,unknown - 40_Matthew_03\n")
+#     write_file.write("/storage/emulated/0/Music/Bible-Audio/40_matthew/40_Matthew_03.mp3\n")
+#     write_file.write("#EXTINF:237,<unknown> - 01_genesis_005\n")
+#     write_file.write("/storage/emulated/0/Music/Bible-Audio/01_genesis/01_genesis_005.mp3\n")
+#     write_file.write("#EXTINF:244,<unknown")

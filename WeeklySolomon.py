@@ -9,8 +9,6 @@ import datetime
 
 from bible_books import bible_books
 from create_bible_plan import (
-    get_weekday,
-    get_weekday_delta,
     print_daily_reading,
     process_reading,
 )
