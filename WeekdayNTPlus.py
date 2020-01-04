@@ -237,6 +237,22 @@ def WeeklyWisdom(year, day_of_week):  # Weekly Wisdom
         date = process_reading(date, book_abbr, chapter, 7)
 
 
+def print_daily_reading(cal_date, previous_month,full_refs):
+
+    month = cal_date[0:2]
+    if month != previous_month:  # Month changed
+        print(f"\n\t{calendar.month_name[int(month)]} 2020\n")
+        previous_month = month
+
+    print("□ " + cal_date[3:] + ":", ", ".join(full_refs))
+    # □ 28 Mon: Psa 149:6-9, Rev 19, Zec 11-12
+
+    if (cal_date[6:9] == "Sat"):
+        print("------------------------------------------------------------")
+
+    return previous_month
+
+
 def main():
     YEAR = 2020
     WeekdayPsalms(YEAR)
@@ -250,14 +266,8 @@ def main():
 
     previous_month = ""
     for cal_date, full_refs in sorted(daily_readings.items()):
-        month = cal_date[0:2]
-        if month != previous_month:  # Month changed
-            print(f"\n\t{calendar.month_name[int(month)]} 2020\n")
-            previous_month = month
-        print("□ " + cal_date[3:] + ":", ", ".join(full_refs))
-        # □ 28 Mon: Psa 149:6-9, Rev 19, Zec 11-12
-        if (cal_date[6:9] == "Sat"):
-            print("------------------------------------------------------------")
+        previous_month = print_daily_reading(cal_date, previous_month,full_refs)
+        # create_play_list(cal_date, full_refs)
 
 
 if __name__ == "__main__":
