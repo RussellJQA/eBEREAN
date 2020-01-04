@@ -20,7 +20,7 @@ bible_books = {
     'Psalms': ('Psa', 150),
     'Proverbs': ('Pro', 31),
     'Ecclesiastes': ('Ecc', 12),
-    'Song of Solomon': ('Sng', 8),
+    'SongOfSolomon': ('Sng', 8),
     'Isaiah': ('Isa', 66),
     'Jeremiah': ('Jer', 52),
     'Lamentations': ('Lam', 5),

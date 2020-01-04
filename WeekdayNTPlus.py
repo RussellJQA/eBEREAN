@@ -1,3 +1,12 @@
+"""
+A consolidation of several Bible Reading plans:
+    WeeklyNT
+    WeeklySolomon
+    OTDailyDuo
+    WeekdayPsalms
+    WeekendPsalms
+"""
+
 import calendar
 import datetime
 
@@ -8,15 +17,15 @@ from create_bible_plan import (
     print_daily_reading,
     process_reading,
 )
-from psalm_readings import weekend_psalm_readings, weekday_psalm_readings
-
 from create_play_list import create_play_list
+
+from psalm_readings import weekend_psalm_readings, weekday_psalm_readings
+from WeekdayNT import WeekdayNT
+from WeeklySolomon import WeeklySolomon
 
 bible_books_list = list(bible_books.keys())
 
-solomon = ["Proverbs", "Ecclesiastes", "Song of Solomon"]
-# Solomon's Proverbial wisdom, the wisdom of the Preacher, and Wisdom and His Wife
-# ('Wisdom' being 'One Wiser than Solomon' )
+solomon = ["Proverbs", "Ecclesiastes", "SongOfSolomon"]
 
 
 def WeekdayPsalms(daily_readings, year):  # Weekday Worship (Psalms)
@@ -64,54 +73,6 @@ def WeekendPsalms(daily_readings, year):  # Weekend Worship (Psalms)
         # Else {date is a Saturday} increment date to the next day (a Lord's Day)
         (daily_readings, date) = process_reading(
             daily_readings, date, "Psa", psalm_ref, datedelta
-        )
-
-    return daily_readings
-
-
-def WeekdayNT(daily_readings, year):  # Weekday New Testament
-    date = datetime.datetime(year, 1, 1)  # January 1
-    while date.strftime("%a") in ("Sat", "Sun"):
-        date += datetime.timedelta(days=1)  # Increment until first weekday
-
-    # TODO: Change this and similar functions to use classes/subclasses.
-
-    substitutions = [
-        ["Luk 1", ["Luk 1:1-38", "Luk 1:39-80"]],
-        ["Mat 26", ["Mat 26:1-35", "Mat 26:36-75"]],
-    ]  # Split (when needed) 1 or 2 of the 2 longest NT chapters
-
-    def get_num_extra_readings():
-        num_extra_readings = 0
-        if get_weekday(datetime.datetime(year, 12, 31)) not in ("Sat", "Sun"):
-            num_extra_readings += 1  # Increment if December 31 is a weekday
-        if calendar.isleap(year) and (
-            get_weekday(datetime.datetime(year, 12, 30)) not in ("Sat", "Sun")
-        ):
-            num_extra_readings += 1  # Increment if leap year & December 30 is a weekday
-        # print(f'{num_extra_readings} extra WeekdayNT readings are needed for {year}')
-        return num_extra_readings
-
-    def get_readings(num_extra_readings):
-        readings = []
-        for book in bible_books_list[
-            bible_books_list.index("Matthew") : bible_books_list.index("Revelation") + 1
-        ]:
-            book_abbr, book_chapters = bible_books[book]
-            for chapter in range(1, book_chapters + 1):
-                readings.append(book_abbr + " " + str(chapter))
-        for i in range(num_extra_readings):
-            substitution = substitutions.pop(0)
-            index = readings.index(substitution[0])
-            readings[index : index + 1] = substitution[1]
-        return readings
-
-    readings = get_readings(get_num_extra_readings())
-    for reading in readings:
-        book_abbr, chapter = reading.split()
-        datedelta = get_weekday_delta(date)
-        (daily_readings, date) = process_reading(
-            daily_readings, date, book_abbr, chapter, datedelta
         )
 
     return daily_readings
@@ -168,49 +129,6 @@ def OTMain(daily_readings, year):
     return daily_readings
 
 
-def WeeklyWisdom(daily_readings, year, day_of_week):  # Weekly Wisdom
-    # Solomon's Proverbial wisdom, the wisdom of the Preacher, and Wisdom and His Wife
-    # ('Wisdom' being 'One Wiser than Solomon' )
-
-    date = datetime.datetime(year, 1, 1)  # January 1
-    while date.strftime("%a") != day_of_week:
-        date += datetime.timedelta(days=1)  # Increment until specified day_of_week
-
-    substitutions = [
-        ["Pro 8", ["Pro 8:1-18", "Pro 8:19-36"]],
-        ["Pro 23", ["Pro 23:1-18", "Pro 23:19-35"]],
-    ]  # Split (when needed) 1 or 2 of the 2 longest Weekly Wisdom chapters
-
-    def get_num_extra_readings():
-        num_extra_readings = 1  # There are only 51 chapters in Pro thru Ecc
-        if (date + datetime.timedelta(days=52 * 7)) <= datetime.datetime(year, 12, 31):
-            # if (52 weeks from start date) is before or on December 31, then ...
-            num_extra_readings += 1
-        # print(f'{num_extra_readings} extra WeeklyWisdom readings are needed for {year} ({day_of_week})')
-        return num_extra_readings
-
-    def get_readings(num_extra_readings):
-        readings = []
-        for book in solomon:
-            book_abbr, book_chapters = bible_books[book]
-            for chapter in range(1, book_chapters + 1):
-                readings.append(book_abbr + " " + str(chapter))
-        for i in range(num_extra_readings):
-            substitution = substitutions.pop(0)
-            index = readings.index(substitution[0])
-            readings[index : index + 1] = substitution[1]
-        return readings
-
-    readings = get_readings(get_num_extra_readings())
-    for reading in readings:
-        book_abbr, chapter = reading.split()
-        (daily_readings, date) = process_reading(
-            daily_readings, date, book_abbr, chapter, 7
-        )
-
-    return daily_readings
-
-
 def main():
     daily_readings = {}
     YEAR = 2020
@@ -218,7 +136,7 @@ def main():
     WeekendPsalms(daily_readings, YEAR)
     WeekdayNT(daily_readings, YEAR)
     OTMain(daily_readings, YEAR)
-    WeeklyWisdom(daily_readings, YEAR, "Sat")  # Saturdays with Solomon
+    WeeklySolomon(daily_readings, YEAR, "Sat")  # Saturdays with Solomon
 
     # for cal_date, full_refs in sorted(daily_readings.items()):
     #     print(cal_date, full_refs)  # Useful for debugging
