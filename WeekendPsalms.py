@@ -12,7 +12,7 @@ from create_bible_plan import (
     print_daily_reading,
     process_reading,
 )
-from create_play_list import create_play_list
+from create_daily_bible_reading_play_list import create_daily_bible_reading_play_list
 
 from psalm_readings import weekend_psalm_readings
 
@@ -57,7 +57,7 @@ def main():
     for (cal_date, full_refs) in sorted(daily_readings.items()):
         # items() returns a list of (key, value) tuples
         previous_month = print_daily_reading(cal_date, previous_month, full_refs)
-        create_play_list(cal_date, full_refs)
+        create_daily_bible_reading_play_list(cal_date, full_refs)
 
 
 if __name__ == "__main__":
