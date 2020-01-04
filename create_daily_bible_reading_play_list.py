@@ -2,9 +2,15 @@
 Create a daily MP3 playlist for each day in a Bible reading plan.
 """
 
+# TODO: Currently this properly handles readings of exactly 1 whole chapter
+#       like Mat 26 or Luk 1, but not:
+#       • Partial chapters like Mat 26:1-35, Luk 1:39-80, Pro 8:1-18, Psa 78:1-37
+#       • Multiple chapters like Psa 1-2, Psa 52-54, Psa 120-122, Psa 123-125, etc.
+#       • Mixtures: Psa 105:38-45;106:1-13, Psa 117;118:1-14, Psa 133;134;135:1-12, etc.
+
 from bible_books import bible_books
 
-def create_play_list(cal_date, full_refs):
+def create_daily_bible_reading_play_list(cal_date, full_refs):
 
     path = "/storage/emulated/0/Music/Bible-Audio/"
     book_numbers_and_names = {}
