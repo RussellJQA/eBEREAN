@@ -9,7 +9,7 @@ from create_bible_plan import (
     process_reading,
 )
 
-# from create_play_list import create_play_list
+from create_play_list import create_play_list
 
 bible_books_list = list(bible_books.keys())
 
@@ -223,9 +223,10 @@ def main():
     #     print(cal_date, full_refs)  # Useful for debugging
 
     previous_month = ""
-    for cal_date, full_refs in sorted(daily_readings.items()):
+    for (cal_date, full_refs) in sorted(daily_readings.items()):
+        # items() returns a list of (key, value) tuples
         previous_month = print_daily_reading(cal_date, previous_month, full_refs)
-        # create_play_list(cal_date, full_refs)
+        create_play_list(cal_date, full_refs)
 
 
 if __name__ == "__main__":
