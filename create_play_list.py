@@ -8,7 +8,7 @@
 #     write_file.write("/storage/emulated/0/Music/Bible-Audio/01_genesis/01_genesis_005.mp3\n")
 #     write_file.write("#EXTINF:244,<unknown")
 
-from bible_data import bible_books
+from bible_books import bible_books
 
 def create_play_list(cal_date, full_refs):
 

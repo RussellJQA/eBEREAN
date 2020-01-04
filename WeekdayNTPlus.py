@@ -1,13 +1,14 @@
 import calendar
 import datetime
 
-from bible_data import bible_books, weekend_psalm_readings, weekday_psalm_readings
+from bible_books import bible_books
 from create_bible_plan import (
     get_weekday,
     get_weekday_delta,
     print_daily_reading,
     process_reading,
 )
+from psalm_readings import weekend_psalm_readings, weekday_psalm_readings
 
 from create_play_list import create_play_list
 
