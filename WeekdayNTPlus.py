@@ -1,10 +1,10 @@
 """
 A consolidation of several Bible Reading plans:
-    WeeklyNT
-    WeeklySolomon
-    OTDailyDuo
     WeekdayPsalms
     WeekendPsalms
+    WeeklyNT
+    DailyOTDuo
+    WeeklySolomon
 """
 
 import calendar
@@ -19,7 +19,7 @@ from create_bible_plan import (
 )
 from create_daily_bible_reading_play_list import create_daily_bible_reading_play_list
 
-from psalm_readings import weekend_psalm_readings, weekday_psalm_readings
+from WeekdayPsalms import WeekdayPsalms
 from WeekendPsalms import WeekendPsalms
 from WeekdayNT import WeekdayNT
 from WeeklySolomon import WeeklySolomon
@@ -29,31 +29,7 @@ bible_books_list = list(bible_books.keys())
 solomon = ["Proverbs", "Ecclesiastes", "SongOfSolomon"]
 
 
-def WeekdayPsalms(daily_readings, year):  # Weekday Worship (Psalms)
-    date = datetime.datetime(year, 1, 1)  # January 1
-    while date.strftime("%a") in ("Sat", "Sun"):
-        date += datetime.timedelta(days=1)  # Increment until first weekday
-
-    # TODO: Add needed extra readings.
-    #       For years other than 2020, the readings themselves may need to be adjusted.
-    # extra_readings = 0
-    # if (get_weekday(datetime.datetime(year, 12, 31)) not in ('Sat', 'Sun')):
-    #     extra_readings += 1  # Increment if December 31 is a weekday
-    # if (calendar.isleap(year) and
-    #     (get_weekday(datetime.datetime(year, 12, 30)) not in ('Sat', 'Sun'))):
-    #     extra_readings += 1  # Increment if leap year & December 30 is a weekday
-    # print(f'For {year}, {extra_readings} extra WeekdayPsalms() readings are needed.')
-
-    for count, psalm_ref in enumerate(weekday_psalm_readings):
-        datedelta = get_weekday_delta(date)
-        (daily_readings, date) = process_reading(
-            daily_readings, date, "Psa", psalm_ref, datedelta
-        )
-
-    return daily_readings
-
-
-def OTMain(daily_readings, year):
+def DailyOTDuo(daily_readings, year):
     # Daily OT Duo (OT without Psalms and without Solomon's Writings)
     date = datetime.datetime(year, 1, 1)  # January 1
 
@@ -110,7 +86,7 @@ def main():
     WeekdayPsalms(daily_readings, YEAR)
     WeekendPsalms(daily_readings, YEAR)
     WeekdayNT(daily_readings, YEAR)
-    OTMain(daily_readings, YEAR)
+    DailyOTDuo(daily_readings, YEAR)
     WeeklySolomon(daily_readings, YEAR, "Sat")  # Saturdays with Solomon
 
     # for cal_date, full_refs in sorted(daily_readings.items()):
