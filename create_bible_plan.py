@@ -1,6 +1,9 @@
 import calendar
 import datetime
 import json
+import os
+
+from create_bible_plan_playlists import create_bible_plan_playlists
 
 
 def get_weekday(date):
@@ -17,18 +20,46 @@ def get_weekday_delta(date):
         return 1
 
 
-def print_daily_reading(cal_date, previous_month, full_refs):
+def make_plan_folder(plan):
+    if not os.path.isdir(plan):
+        os.mkdir(plan)
 
+
+def create_plan_with_playlists(plan, daily_readings):
+    make_plan_folder(plan)
+    previous_month = ""
+    with open(plan + "/daily_readings.txt", "w") as readings_file:
+        for (cal_date, full_refs) in sorted(daily_readings.items()):
+            # items() returns a list of (key, value) tuples
+            previous_month = print_daily_reading(
+                plan, cal_date, previous_month, full_refs, readings_file
+            )
+            create_bible_plan_playlists(plan, cal_date, full_refs)
+
+
+def print_daily_reading(plan, cal_date, previous_month, full_refs, readings_file):
     month = cal_date[0:2]
     if month != previous_month:  # Month changed
-        print(f"\n\t{calendar.month_name[int(month)]} 2020\n")
+        month_header = f"\n\t{calendar.month_name[int(month)]} 2020\n"
+        print(month_header)
+        readings_file.write(f"{month_header}\n")
         previous_month = month
 
-    print("□ " + cal_date[3:] + ":", ", ".join(full_refs))
+    daily_reading = "□ " + cal_date[3:] + ": " + ", ".join(full_refs)
     # □ 28 Mon: Psa 149:6-9, Rev 19, Zec 11-12
+    print(daily_reading)
+
+    # readings_file.write(f"{daily_reading}\n")
+    # TOD: Eliminate the following error, resulting from the above line of code
+    """
+    UnicodeEncodeError: 'charmap' codec can't encode character '\u25a1' in position 0: character maps to <undefined>
+    """
+    readings_file.write(f"{daily_reading[2:]}\n")
 
     if cal_date[6:9] == "Sat":
-        print("------------------------------------------------------------")
+        horizontal_rule = "------------------------------------------------------------"
+        print(horizontal_rule)
+        readings_file.write(f"{horizontal_rule}\n")
 
     return previous_month
 

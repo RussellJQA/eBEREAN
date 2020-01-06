@@ -12,7 +12,7 @@ import os
 
 from bible_books import bible_books
 
-def create_bible_plan_playlists(plan_name, cal_date, full_refs):
+def create_bible_plan_playlists(plan, cal_date, full_refs):
 
     path = "/storage/emulated/0/Music/Bible-Audio/"
     book_numbers_and_names = {}
@@ -24,9 +24,9 @@ def create_bible_plan_playlists(plan_name, cal_date, full_refs):
         book_numbers_and_names[book_abbrev] = book_number_and_name
 
     readings_for = cal_date[0:2] + cal_date[3:5] + cal_date[6:9]
-    if not os.path.isdir(plan_name):
-        os.mkdir(plan_name)
-    with open(plan_name + "/" + readings_for + ".m3u8", "w") as write_file:
+    if not os.path.isdir(plan):
+        os.mkdir(plan)
+    with open(plan + "/" + readings_for + ".m3u8", "w") as write_file:
         write_file.write("#EXTM3U\n")
         for full_ref in full_refs:
             book_abbr = full_ref[0:3]

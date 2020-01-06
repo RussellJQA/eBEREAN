@@ -4,15 +4,14 @@ Create a Bible reading plan with readings from the Psalms for each weekday.
 
 import calendar
 import datetime
+import os
 
 from bible_books import bible_books
 from create_bible_plan import (
-    get_weekday,
+    create_plan_with_playlists,
     get_weekday_delta,
-    print_daily_reading,
     process_reading,
 )
-from create_bible_plan_playlists import create_bible_plan_playlists
 
 bible_books_list = list(bible_books.keys())
 
@@ -309,15 +308,9 @@ def main():
     daily_readings = {}
     YEAR = 2020
     WeekdayPsalms(daily_readings, YEAR)
-
     # for cal_date, full_refs in sorted(daily_readings.items()):
     #     print(cal_date, full_refs)  # Useful for debugging
-
-    previous_month = ""
-    for (cal_date, full_refs) in sorted(daily_readings.items()):
-        # items() returns a list of (key, value) tuples
-        previous_month = print_daily_reading(cal_date, previous_month, full_refs)
-        create_bible_plan_playlists("WeekdayPsalms", cal_date, full_refs)
+    create_plan_with_playlists("WeekdayPsalms", daily_readings)
 
 
 if __name__ == "__main__":
