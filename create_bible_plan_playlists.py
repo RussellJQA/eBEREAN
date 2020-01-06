@@ -1,16 +1,18 @@
 """
-Create a daily MP3 playlist for each day in a Bible reading plan.
+Create an MP3 playlist for each day in the specified Bible reading plan.
 """
 
 # TODO: Currently this properly handles readings of exactly 1 whole chapter
 #       like Mat 26 or Luk 1, but not:
-#       • Partial chapters like Mat 26:1-35, Luk 1:39-80, Pro 8:1-18, Psa 78:1-37
 #       • Multiple chapters like Psa 1-2, Psa 52-54, Psa 120-122, Psa 123-125, etc.
+#       • Partial chapters like Mat 26:1-35, Luk 1:39-80, Pro 8:1-18, Psa 78:1-37
 #       • Mixtures: Psa 105:38-45;106:1-13, Psa 117;118:1-14, Psa 133;134;135:1-12, etc.
+
+import os
 
 from bible_books import bible_books
 
-def create_daily_bible_reading_play_list(cal_date, full_refs):
+def create_bible_plan_playlists(plan_name, cal_date, full_refs):
 
     path = "/storage/emulated/0/Music/Bible-Audio/"
     book_numbers_and_names = {}
@@ -22,7 +24,9 @@ def create_daily_bible_reading_play_list(cal_date, full_refs):
         book_numbers_and_names[book_abbrev] = book_number_and_name
 
     readings_for = cal_date[0:2] + cal_date[3:5] + cal_date[6:9]
-    with open("playlists/" + readings_for + ".m3u8", "w") as write_file:
+    if not os.path.isdir(plan_name):
+        os.mkdir(plan_name)
+    with open(plan_name + "/" + readings_for + ".m3u8", "w") as write_file:
         write_file.write("#EXTM3U\n")
         for full_ref in full_refs:
             book_abbr = full_ref[0:3]
@@ -37,12 +41,14 @@ def create_daily_bible_reading_play_list(cal_date, full_refs):
             write_file.write(path + book_number_and_name + "/" + reading + ".mp3\n")
         write_file.write("#EXTINF:244,<unknown")
 
-# with open("Playlist.m3u8", "w") as write_file:
-#     write_file.write("#EXTM3U\n")
-#     write_file.write("#EXTINF:-1,unknown - 19_psalms_002\n")
-#     write_file.write("/storage/emulated/0/Music/Bible-Audio/19_psalms/19_psalms_002.mp3\n")
-#     write_file.write("#EXTINF:-1,unknown - 40_Matthew_03\n")
-#     write_file.write("/storage/emulated/0/Music/Bible-Audio/40_matthew/40_Matthew_03.mp3\n")
-#     write_file.write("#EXTINF:237,<unknown> - 01_genesis_005\n")
-#     write_file.write("/storage/emulated/0/Music/Bible-Audio/01_genesis/01_genesis_005.mp3\n")
-#     write_file.write("#EXTINF:244,<unknown")
+# Example of a similar MP3 playlist taken from my Nexus 6P:
+"""
+#EXTM3U
+#EXTINF:-1,unknown - 19_psalms_002
+/storage/emulated/0/Music/Bible-Audio/19_psalms/19_psalms_002.mp3
+#EXTINF:-1,unknown - 40_Matthew_03
+/storage/emulated/0/Music/Bible-Audio/40_matthew/40_Matthew_03.mp3
+#EXTINF:237,<unknown> - 01_genesis_005
+/storage/emulated/0/Music/Bible-Audio/01_genesis/01_genesis_005.mp3
+#EXTINF:244,<unknown
+"""

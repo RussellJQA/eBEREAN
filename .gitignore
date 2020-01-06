@@ -3,6 +3,6 @@
 /__pycache__
 /*.bat
 /chapter_files
-/playlists
 /create_play_list.py
 /psalm_readings.py
+*.m3u8
