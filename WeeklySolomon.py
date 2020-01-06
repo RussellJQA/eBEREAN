@@ -65,7 +65,7 @@ def main():
     WeeklySolomon(daily_readings, YEAR, "Sat")  # Saturdays with Solomon
     # for cal_date, full_refs in sorted(daily_readings.items()):
     #     print(cal_date, full_refs)  # Useful for debugging
-    create_plan_with_playlists("WeeklySolomon", daily_readings)
+   create_plan_with_playlists("WeeklySolomon", daily_readings)
 
 
 if __name__ == "__main__":
