@@ -28,7 +28,8 @@ def make_plan_folder(plan):
 def create_plan_with_playlists(plan, daily_readings):
     make_plan_folder(plan)
     previous_month = ""
-    with open(plan + "/daily_readings.txt", "w") as readings_file:
+    with open(plan + "/daily_readings.txt", "w", encoding='utf-8') as readings_file:
+        # 'utf-8' allows including Unicode "□" (U+25A1: White Square) character
         for (cal_date, full_refs) in sorted(daily_readings.items()):
             # items() returns a list of (key, value) tuples
             previous_month = print_daily_reading(
@@ -48,13 +49,7 @@ def print_daily_reading(plan, cal_date, previous_month, full_refs, readings_file
     daily_reading = "□ " + cal_date[3:] + ": " + ", ".join(full_refs)
     # □ 28 Mon: Psa 149:6-9, Rev 19, Zec 11-12
     print(daily_reading)
-
-    # readings_file.write(f"{daily_reading}\n")
-    # TOD: Eliminate the following error, resulting from the above line of code
-    """
-    UnicodeEncodeError: 'charmap' codec can't encode character '\u25a1' in position 0: character maps to <undefined>
-    """
-    readings_file.write(f"{daily_reading[2:]}\n")
+    readings_file.write(f"{daily_reading}\n")
 
     if cal_date[6:9] == "Sat":
         horizontal_rule = "------------------------------------------------------------"
