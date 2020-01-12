@@ -12,6 +12,7 @@ import os
 
 from bible_books import bible_books
 
+
 def create_bible_plan_playlists(plan, cal_date, full_refs):
 
     path = "/storage/emulated/0/Music/Bible-Audio/"
@@ -33,13 +34,14 @@ def create_bible_plan_playlists(plan, cal_date, full_refs):
             book_number_and_name = book_numbers_and_names[book_abbr]
             book_num = book_number_and_name[0:2]
             chapter_verse_ref = full_ref[4:].zfill(3 if book_num <= "39" else 2)
-            reading = book_number_and_name + '_' + chapter_verse_ref
-                # "Gen 1-2" -> "01_gen_1-2"
-                # "Psa 1" -> "19_psalm_1"
-                # "Mat 1" -> "40_matthew_1"
+            reading = book_number_and_name + "_" + chapter_verse_ref
+            # "Gen 1-2" -> "01_gen_1-2"
+            # "Psa 1" -> "19_psalm_1"
+            # "Mat 1" -> "40_matthew_1"
             write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
             write_file.write(path + book_number_and_name + "/" + reading + ".mp3\n")
         write_file.write("#EXTINF:244,<unknown")
+
 
 # Example of a similar MP3 playlist taken from my Nexus 6P:
 """

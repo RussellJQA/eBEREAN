@@ -111,7 +111,7 @@ rmm_original_104_psalm_readings = [
     "145",
     "146-147",
     "148",
-    "149-150"
+    "149-150",
 ]
 
 """
@@ -121,6 +121,8 @@ The original 104 readings fit well in a 2-day per week (as in weekend day) plan:
     104 readings / 52 weeks = 2 readings per week
 But the 260 readings below are meant to fit a 5-day per week (as in weekday) plan:
     260 readings / 52 weeks = 5 readings per week.
+When choosing the 260 readings, readings (where deemed appropriate), were aligned
+with those of the 6-day per week FPCR Comprehensive Psalter.
 """
 rmm_modified_260_psalm_readings = [
     "1",
@@ -382,5 +384,5 @@ rmm_modified_260_psalm_readings = [
     "148:7-14",
     "149:1-5",
     "149:6-9",
-    "150"
+    "150",
 ]

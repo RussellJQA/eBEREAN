@@ -28,7 +28,7 @@ def make_plan_folder(plan):
 def create_plan_with_playlists(plan, daily_readings):
     make_plan_folder(plan)
     previous_month = ""
-    with open(plan + "/daily_readings.txt", "w", encoding='utf-8') as readings_file:
+    with open(plan + "/daily_readings.txt", "w", encoding="utf-8") as readings_file:
         # 'utf-8' allows including Unicode "□" (U+25A1: White Square) character
         for (cal_date, full_refs) in sorted(daily_readings.items()):
             # items() returns a list of (key, value) tuples
