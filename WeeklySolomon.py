@@ -34,17 +34,16 @@ def WeeklySolomon(daily_readings, year, day_of_week):  # Weekly Solomon's Readin
             # print(f'{num_extra_readings} extra WeeklyWisdom readings are needed for {year} ({day_of_week})')
             return num_extra_readings
 
-        substitutions = [
-            ["Pro 8", ["Pro 8:1-18", "Pro 8:19-36"]],
-            ["Pro 23", ["Pro 23:1-18", "Pro 23:19-35"]],
-        ]  # Split (when needed) 1 or 2 of the 2 longest Weekly Wisdom chapters
-
         readings = []
         for book in solomon:
             book_abbr, book_chapters = bible_books[book]
             for chapter in range(1, book_chapters + 1):
                 readings.append(book_abbr + " " + str(chapter))
 
+        substitutions = [
+            ["Pro 8", ["Pro 8:1-18", "Pro 8:19-36"]],
+            ["Pro 23", ["Pro 23:1-18", "Pro 23:19-35"]],
+        ]  # Split (when needed) 1 or 2 of the 2 longest Weekly Wisdom chapters
         for i in range(get_num_extra_readings()):
             substitution = substitutions.pop(0)
             index = readings.index(substitution[0])
