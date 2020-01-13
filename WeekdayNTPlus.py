@@ -28,20 +28,21 @@ def DailyOTDuo(daily_readings, year):
     # Daily OT Duo (OT without Psalms and without Solomon's Writings)
     date = datetime.datetime(year, 1, 1)  # January 1
 
-    substitutions = [
-        ["Num 7", ["Num 7:1-47", "Num 7:48-89"]],
-        ["1Ch 6", ["1Ch 6:1-48", "1Ch 6:49-81"]],
-        ["Neh 7", ["Neh 7:1-38", "Neh 7:39-73"]],
-        ["Ezr 2", ["Ezr 2:1-36", "Ezr 2:37-70"]],
-    ]  # Split (when needed) 1-4 of the 4 longest OT chapters
-    #    (excluding Psalms and Solomon's writings)
+    def get_readings():
 
-    def get_num_extra_readings():
-        num_extra_readings = 4 if calendar.isleap(year) else 2
-        # print(f"{num_extra_readings} extra OTMain readings are needed for {year}.")
-        return num_extra_readings
+        def get_num_extra_readings():
+            num_extra_readings = 4 if calendar.isleap(year) else 2
+            # print(f"{num_extra_readings} extra OTMain readings needed for {year}.")
+            return num_extra_readings
 
-    def get_readings(num_extra_readings):
+        substitutions = [
+            ["Num 7", ["Num 7:1-47", "Num 7:48-89"]],
+            ["1Ch 6", ["1Ch 6:1-48", "1Ch 6:49-81"]],
+            ["Neh 7", ["Neh 7:1-38", "Neh 7:39-73"]],
+            ["Ezr 2", ["Ezr 2:1-36", "Ezr 2:37-70"]],
+        ]  # Split (when needed) 1-4 of the 4 longest OT chapters
+        #    (excluding Psalms and Solomon's writings)
+
         readings = []
 
         ot_without_psalms_and_solomon = bible_books_list[
@@ -55,14 +56,17 @@ def DailyOTDuo(daily_readings, year):
             book_abbr, book_chapters = bible_books[book]
             for chapter in range(1, book_chapters + 1):
                 readings.append(book_abbr + " " + str(chapter))
-        for i in range(num_extra_readings):
+
+        for i in range(get_num_extra_readings()):
             substitution = substitutions.pop(0)
             index = readings.index(substitution[0])
             readings[index : index + 1] = substitution[1]
+
         return readings
 
-    readings = get_readings(get_num_extra_readings())
+    readings = get_readings()
     chapter_count = 0
+
     for reading in readings:
         chapter_count += 1
         book_abbr, chapter = reading.split()

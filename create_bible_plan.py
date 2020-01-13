@@ -39,6 +39,9 @@ def create_plan_with_playlists(plan, daily_readings):
 
 
 def print_daily_reading(plan, cal_date, previous_month, full_refs, readings_file):
+
+    # TODO: Refactor to add additonal output formats, such as CSV or TSV; HTML; and RTF
+
     month = cal_date[0:2]
     if month != previous_month:  # Month changed
         month_header = f"\n\t{calendar.month_name[int(month)]} 2020\n"
@@ -77,15 +80,25 @@ def process_reading(
 
                 daily_readings[cal_date][-1] += "-" + reference
                 # Concatenate new reference to old reference, with a dash separating
-                # TODO: Need to update this to properly merge OT split chapter refs:
-                #   Num 6-7:1-47        => Num 6-7:47   (3/2)
-                #   Num 7:48-89-8       => Num 7:48-89;8 {better: Num 7:48-8:26} (3/3)
+
+                # TODO: Need to refactor above to properly merge OT split chapter refs.
+                # For now, I just hand-tweaked them in any output files
+
+                # Step 1: Use regular expressions to match ref1/ref2 patterns.
+
+                # Pattern 1:
                 #   1Ch 6:1-48-6:49-81  => 1Ch 6:1-81 {better: just 1Ch 6}  {6/21}
                 #   Ezr 2:1-36-2:37-70  => Ezr 2:1-70 {better: just Ezr 2}  {7/22}
                 #   Neh 7:1-38-7:39-73  => Neh 7:1-73 {better: just Neh 7}  {7/30}
-                # {Hint 1: Use regular expressions to match ref1/ref2 patterns.}
-                # {Hint 2: For "better", lookup chapter length (in verses) for ref2.}
-                # For now, I just hand-tweaked these in any output files
+
+                # Pattern 2:
+                #   Num 7:48-89-8       => Num 7:48-89;8 {better: Num 7:48-8:26} (3/3)
+
+                # Pattern 3:
+                #   Num 6-7:1-47        => Num 6-7:47   (3/2)
+
+                # Step 2: Further refactor to get the "better" representations,
+                #   by looking up verse counts in verse_counts_by_chapter.json
 
         else:
             daily_readings[cal_date][-1] += "-" + full_ref

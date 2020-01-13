@@ -43,10 +43,10 @@ def WeekdayPsalms(daily_readings, year):  # Weekday Worship (Psalms)
         )
 
     extra_psalm_refs = ["23", "100"]  # Up to 2 extra readings
-    for count in range(get_num_extra_readings()):
+    for i in range(get_num_extra_readings()):
         datedelta = get_weekday_delta(date)
         (daily_readings, date) = process_reading(
-            daily_readings, date, "Psa", extra_psalm_refs[count], datedelta
+            daily_readings, date, "Psa", extra_psalm_refs[i], datedelta
         )
 
     return daily_readings
