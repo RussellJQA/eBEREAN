@@ -32,7 +32,6 @@ def DailyOTDuo(daily_readings, year):
     date = datetime.datetime(year, 1, 1)  # January 1
 
     def get_readings():
-
         def get_num_extra_readings():
             num_extra_readings = 4 if calendar.isleap(year) else 2
             # print(f"{num_extra_readings} extra OTMain readings needed for {year}.")

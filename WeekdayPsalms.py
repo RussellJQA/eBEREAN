@@ -19,15 +19,17 @@ bible_books_list = list(bible_books.keys())
 
 
 def WeekdayPsalms(daily_readings, year):  # Weekday Worship (Psalms)
-
     def get_num_extra_readings():
         num_extra_readings = 0
-        if (get_weekday(datetime.datetime(year, 12, 31)) not in ('Sat', 'Sun')):
+        if get_weekday(datetime.datetime(year, 12, 31)) not in ("Sat", "Sun"):
             num_extra_readings += 1  # Increment if December 31 is a weekday
-        if (calendar.isleap(year) and
-            (get_weekday(datetime.datetime(year, 12, 30)) not in ('Sat', 'Sun'))):
+        if calendar.isleap(year) and (
+            get_weekday(datetime.datetime(year, 12, 30)) not in ("Sat", "Sun")
+        ):
             num_extra_readings += 1  # Increment if leap year & December 30 is a weekday
-        print(f'For {year}, {num_extra_readings} extra WeekdayPsalms() readings are needed.')
+        print(
+            f"For {year}, {num_extra_readings} extra WeekdayPsalms() readings are needed."
+        )
         return num_extra_readings
 
     date = datetime.datetime(year, 1, 1)  # January 1

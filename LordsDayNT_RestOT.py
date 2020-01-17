@@ -10,6 +10,7 @@ from create_bible_plan import create_plan_with_playlists, get_weekday, process_r
 
 bible_books_list = list(bible_books.keys())
 
+
 def LordsDayNT(daily_readings, year):
 
     date = datetime.datetime(year, 1, 1)  # January 1
@@ -28,8 +29,6 @@ def LordsDayNT(daily_readings, year):
             for chapter in range(1, book_chapters + 1):
                 readings.append(book_abbr + " " + str(chapter))
 
-        # TODO: Merge similar references
-
         return readings
 
     chapter_count = 0
@@ -43,6 +42,7 @@ def LordsDayNT(daily_readings, year):
         )
 
     return daily_readings
+
 
 def Rest_OT(daily_readings, year):
     # 3 OT chapters on every day other than the Lord's Day
@@ -64,7 +64,7 @@ def Rest_OT(daily_readings, year):
                 readings.append(book_abbr + " " + str(chapter))
 
         ps119_index = readings.index("Psa 119")
-        readings[ps119_index:ps119_index+1] = [
+        readings[ps119_index : ps119_index + 1] = [
             "Psa 119:1-24",
             "Psa 119:25-48",
             "Psa 119:49-72",
@@ -74,8 +74,6 @@ def Rest_OT(daily_readings, year):
             "Psa 119:145-160",
             "Psa 119:161-176",
         ]  # Split Psalm 119 for 52*6=312 total readings
-
-        # TODO: Merge similar references
 
         return readings
 

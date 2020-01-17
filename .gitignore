@@ -2,8 +2,9 @@
 /MyNotes
 /__pycache__
 /*.bat
-/chapter_files
+/kjv_chapter_files
 /create_play_list.py
 /psalm_readings.py
 *.m3u8
 daily_readings.txt
+FPCR_Comprehensive_Psalter.py

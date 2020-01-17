@@ -22,7 +22,7 @@ import glob
 import json
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
-source_files = os.path.join(script_dir, "chapter_files")
+source_files = os.path.join(script_dir, "kjv_chapter_files")
 
 book_abbrevs = {}
 verse_counts_by_count = {}  # dict of full_refs, indexed by verse counts
@@ -30,9 +30,9 @@ verse_counts_by_desc_count = {}  # above dict, sorted by decreasing verse count
 verse_counts_by_chapter = {}  # dict of verse counts, indexed by chapter
 # e.g., dict["Gen 1"]=31
 
-chapter_files = sorted(glob.glob(os.path.join(source_files, "*.txt")))
+kjv_chapter_files = sorted(glob.glob(os.path.join(source_files, "*.txt")))
 # sorted() because glob() may return the list in an arbitrary order
-for chapter_file in chapter_files:
+for chapter_file in kjv_chapter_files:
 
     read_file = open(chapter_file, "r")
     lines = read_file.readlines()

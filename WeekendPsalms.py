@@ -17,13 +17,13 @@ bible_books_list = list(bible_books.keys())
 
 
 def WeekendPsalms(daily_readings, year):  # Weekend Worship (Psalms)
-
     def get_num_extra_readings():
         num_extra_readings = 0
-        if (get_weekday(datetime.datetime(year, 12, 31)) in ('Sat', 'Sun')):
+        if get_weekday(datetime.datetime(year, 12, 31)) in ("Sat", "Sun"):
             extra_readings += 1  # Increment if December 31 is on a weekend
-        if (calendar.isleap(year) and
-            (get_weekday(datetime.datetime(year, 12, 30)) in ('Sat', 'Sun'))):
+        if calendar.isleap(year) and (
+            get_weekday(datetime.datetime(year, 12, 30)) in ("Sat", "Sun")
+        ):
             extra_readings += 1  # Increment if leap year & December 30 is on a weekend
         # print(f'For {year}, {num_extra_readings} extra WeekendPsalms() readings are needed.')
         return num_extra_readings

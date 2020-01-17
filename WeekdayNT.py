@@ -26,7 +26,6 @@ def WeekdayNT(daily_readings, year):  # Weekday New Testament
     # TODO: Change this and similar functions to use classes/subclasses.
 
     def get_readings():
-
         def get_num_extra_readings():
             num_extra_readings = 0
             if get_weekday(datetime.datetime(year, 12, 31)) not in ("Sat", "Sun"):
@@ -34,7 +33,9 @@ def WeekdayNT(daily_readings, year):  # Weekday New Testament
             if calendar.isleap(year) and (
                 get_weekday(datetime.datetime(year, 12, 30)) not in ("Sat", "Sun")
             ):
-                num_extra_readings += 1  # Increment if leap year & December 30 is a weekday
+                num_extra_readings += (
+                    1  # Increment if leap year & December 30 is a weekday
+                )
             # print(f'{num_extra_readings} extra WeekdayNT readings needed for {year}')
             return num_extra_readings
 
