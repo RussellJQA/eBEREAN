@@ -72,13 +72,13 @@ for chapter_file in kjv_chapter_files:
     verse_counts_by_chapter[full_ref] = verse_count
 
 
-with open("book_abbreviations.json", "w") as write_file:
+with open(r"BibleMetaData\book_abbreviations.json", "w") as write_file:
     json.dump(book_abbrevs, write_file, indent=4)
 
 for verse_count, full_refs in sorted(verse_counts_by_count.items(), reverse=True):
     verse_counts_by_desc_count[verse_count] = full_refs
-with open("verse_counts_by_desc_count.json", "w") as write_file:
+with open(r"BibleMetaData\verse_counts_by_desc_count.json", "w") as write_file:
     json.dump(verse_counts_by_desc_count, write_file, indent=4)
 
-with open("verse_counts_by_chapter.json", "w") as write_file:
+with open(r"BibleMetaData\verse_counts_by_chapter.json", "w") as write_file:
     json.dump(verse_counts_by_chapter, write_file, indent=4)
