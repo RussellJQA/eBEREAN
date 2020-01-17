@@ -20,15 +20,15 @@ def get_weekday_delta(date):
         return 1
 
 
-def make_plan_folder(plan):
-    if not os.path.isdir(plan):
-        os.mkdir(plan)
-
-
 def create_plan_with_playlists(plan, daily_readings):
-    make_plan_folder(plan)
     previous_month = ""
-    with open(plan + "/daily_readings.txt", "w", encoding="utf-8") as readings_file:
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    plan_folder = os.path.join(script_dir, "BiblePlanOutput", plan)
+    if not os.path.isdir(plan_folder):
+        os.mkdir(plan_folder)
+    os.chdir(plan_folder)
+    readings_fn = os.path.join(plan_folder, "daily_readings.txt")
+    with open(readings_fn, "w", encoding="utf-8") as readings_file:
         # 'utf-8' allows including Unicode "□" (U+25A1: White Square) character
         for (cal_date, full_refs) in sorted(daily_readings.items()):
             # items() returns a list of (key, value) tuples
@@ -73,8 +73,11 @@ def process_reading(
         last_book_abbr = last_full_ref[0 : last_full_ref.find(" ")]
 
         if last_book_abbr == book_abbr:
-
-            with open("verse_counts_by_chapter.json", "r") as read_file:
+            bible_metadata_folder = os.path.join(os.getcwd(), "BibleMetaData")
+            read_fn = os.path.join(
+                bible_metadata_folder, "verse_counts_by_chapter.json"
+            )
+            with open(read_fn, "r") as read_file:
                 verse_counts_by_chapter = json.load(read_file)
                 # print(verse_counts_by_chapter)
 
