@@ -15,7 +15,9 @@ def create_bible_plan_playlists(plan, cal_date, full_refs):
     book_num = 0
     for (book_name, (book_abbrev, chapters)) in bible_books.items():
         book_num += 1  # "1 Thessalonians" => 52
-        book_number_and_name = str(book_num) + "_" + book_name.replace(" ", "-").lower()
+        book_number_and_name = (
+            (str(book_num)).zfill(2) + "_" + (book_name.replace(" ", "-").lower())
+        )
         # "1 Thessalonians" => "52_1-thessalonians"
         book_numbers_and_names[book_abbrev] = book_number_and_name
 
@@ -39,7 +41,8 @@ def create_bible_plan_playlists(plan, cal_date, full_refs):
                 initial_chapter = int(match.group(2))
                 final_chapter = int(match.group(4))
                 for chapter in range(initial_chapter, final_chapter + 1):
-                    reading = book_number_and_name + "_" + str(chapter)
+                    chapter_ref = (str(chapter)).zfill(3 if book_num <= "39" else 2)
+                    reading = book_number_and_name + "_" + chapter_ref
                     write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
                     write_file.write(
                         mp3_path + book_number_and_name + "/" + reading + ".mp3\n"
@@ -52,7 +55,8 @@ def create_bible_plan_playlists(plan, cal_date, full_refs):
                     # This handles partial chapters: Psa 78:1-37, Psa 119:1-24,
                     #   Pro 8:1-18, Mat 26:1-35, Luk 1:39-80, etc.
                     # by omitting verse references (Psa 119:1-24 -> 19_psalms_119)
-                    reading = book_number_and_name + "_" + match.group(1)
+                    chapter_ref = (match.group(1)).zfill(3 if book_num <= "39" else 2)
+                    reading = book_number_and_name + "_" + chapter_ref
                 else:
                     # This properly handles readings of 1 full chapter:
                     #   "Psa 1" -> "19_psalm_1"
