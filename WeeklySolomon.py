@@ -8,7 +8,8 @@ import calendar
 import datetime
 import os
 
-from bible_books import bible_books
+from lib.bible_books import bible_books
+
 from create_bible_plan import create_plan_with_playlists, process_reading
 
 
@@ -25,10 +26,11 @@ def WeeklySolomon(daily_readings, year, day_of_week):  # Weekly Solomon's Readin
         date += datetime.timedelta(days=1)  # Increment until specified day_of_week
 
     def get_readings():
-
         def get_num_extra_readings():
             num_extra_readings = 1  # There are only 51 chapters in Pro thru Ecc
-            if (date + datetime.timedelta(days=52 * 7)) <= datetime.datetime(year, 12, 31):
+            if (date + datetime.timedelta(days=52 * 7)) <= datetime.datetime(
+                year, 12, 31
+            ):
                 # if (52 weeks from start date) is before or on December 31, then ...
                 num_extra_readings += 1
             # print(f'{num_extra_readings} extra WeeklyWisdom readings are needed for {year} ({day_of_week})')

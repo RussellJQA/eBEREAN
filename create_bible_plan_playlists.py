@@ -5,7 +5,7 @@ Create an MP3 playlist for each day in the specified Bible reading plan.
 import os
 import re
 
-from bible_books import bible_books
+from lib.bible_books import bible_books
 
 
 def create_bible_plan_playlists(plan, cal_date, full_refs):

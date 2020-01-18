@@ -7,7 +7,8 @@ import calendar
 import datetime
 import os
 
-from bible_books import bible_books
+from lib.bible_books import bible_books
+
 from create_bible_plan import (
     create_plan_with_playlists,
     get_weekday,

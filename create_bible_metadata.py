@@ -22,7 +22,7 @@ import glob
 import json
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
-source_files = os.path.join(script_dir, "kjv_chapter_files")
+source_files = os.path.join(script_dir, "lib", "kjv_chapter_files")
 
 book_abbrevs = {}
 verse_counts_by_count = {}  # dict of full_refs, indexed by verse counts

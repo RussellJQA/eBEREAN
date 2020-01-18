@@ -1,7 +1,8 @@
 /__pycache__
 /Archive
 /BiblePlanOutput
-/kjv_chapter_files
+/lib/kjv_chapter_files
+/lib/__pycache__
 /MyNotes
 /*.bat
 FPCR_Comprehensive_Psalter.py
