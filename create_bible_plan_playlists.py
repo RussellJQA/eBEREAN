@@ -2,14 +2,8 @@
 Create an MP3 playlist for each day in the specified Bible reading plan.
 """
 
-# TODO: Currently this properly handles readings of exactly 1 whole chapter
-#       like Mat 26 or Luk 1, but not:
-#       1. Partial chapters like Mat 26:1-35, Luk 1:39-80, Pro 8:1-18, Psa 78:1-37
-#           Use regular expressions.
-#       2. Multiple chapters like Psa 1-2, Psa 52-54, Psa 120-122, Psa 123-125, etc.
-#       3. Mixtures: Psa 105:38-45;106:1-13, Psa 117;118:1-14, Psa 133;134;135:1-12, etc.
-
 import os
+import re
 
 from bible_books import bible_books
 
@@ -25,8 +19,6 @@ def create_bible_plan_playlists(plan, cal_date, full_refs):
         # "1 Thessalonians" => "52_1-thessalonians"
         book_numbers_and_names[book_abbrev] = book_number_and_name
 
-    print(os.getcwd())
-
     readings_for = cal_date[0:2] + cal_date[3:5] + cal_date[6:9]
     with open(readings_for + ".m3u8", "w") as write_file:
         write_file.write("#EXTM3U\n")
@@ -35,10 +27,29 @@ def create_bible_plan_playlists(plan, cal_date, full_refs):
             book_number_and_name = book_numbers_and_names[book_abbr]
             book_num = book_number_and_name[0:2]
             chapter_verse_ref = full_ref[4:].zfill(3 if book_num <= "39" else 2)
-            reading = book_number_and_name + "_" + chapter_verse_ref
-            # "Gen 1-2" -> "01_gen_1-2"
-            # "Psa 1" -> "19_psalm_1"
-            # "Mat 1" -> "40_matthew_1"
+
+            # Handle partial chapters: Mat 26:1-35, Luk 1:39-80, Pro 8:1-18, Psa 78:1-37
+            pattern = r"(\d{1,3})(:\d{1,3}-\d{1,3})"
+            match = re.search(pattern, chapter_verse_ref)
+            if match:
+                reading = book_number_and_name + "_" + match.group(1)
+                # print(reading)
+                # Omit verse references (Psa 119:1-24 -> 19_psalms_119)
+            else:
+                reading = book_number_and_name + "_" + chapter_verse_ref
+                # Properly handles readings of 1 full chapter:
+                #   "Psa 1" -> "19_psalm_1"
+                #   "Mat 1" -> "40_matthew_1"
+
+            # TODO: Properly handle readings with multiple chapters,
+            # like Psa 1-2, Psa 52-54, Psa 120-122, Psa 123-125, etc.
+            #              Currently        Desired
+            # "Gen 1-2" -> "01_gen_1-2"     "01_gen_1" and "01_gen_2"
+            # "Psa 1-2" -> "19_psalm_1-2"   "19_psalm_1" and "19_psalm_2"
+
+            # TODO: Properly handle readings with mixed references:
+            #   Psa 105:38-45;106:1-13, Psa 117;118:1-14, Psa 133;134;135:1-12, etc.
+
             write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
             write_file.write(mp3_path + book_number_and_name + "/" + reading + ".mp3\n")
         write_file.write("#EXTINF:244,<unknown")
