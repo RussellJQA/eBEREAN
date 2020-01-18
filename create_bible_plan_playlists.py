@@ -8,7 +8,11 @@ import re
 from lib.bible_books import bible_books
 
 
-def create_bible_plan_playlists(plan, cal_date, full_refs):
+def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
+    """
+    An .m3u8 file is essentially the same as an .m3u file, but it's UTF-8 encoded.
+    .m3u was chosen as the default extension since some platforms don't support .m3u8.
+    """
 
     mp3_path = "/storage/emulated/0/Music/Bible-Audio/"
     book_numbers_and_names = {}
@@ -22,7 +26,7 @@ def create_bible_plan_playlists(plan, cal_date, full_refs):
         book_numbers_and_names[book_abbrev] = book_number_and_name
 
     readings_for = cal_date[0:2] + cal_date[3:5] + cal_date[6:9]
-    with open(readings_for + ".m3u8", "w") as write_file:
+    with open(readings_for + "." + m3u_ext, "w") as write_file:
         write_file.write("#EXTM3U\n")
         for full_ref in full_refs:
             book_abbr = full_ref[0:3]
