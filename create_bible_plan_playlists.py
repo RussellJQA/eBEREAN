@@ -28,30 +28,50 @@ def create_bible_plan_playlists(plan, cal_date, full_refs):
             book_num = book_number_and_name[0:2]
             chapter_verse_ref = full_ref[4:].zfill(3 if book_num <= "39" else 2)
 
-            # Handle partial chapters: Mat 26:1-35, Luk 1:39-80, Pro 8:1-18, Psa 78:1-37
-            pattern = r"(\d{1,3})(:\d{1,3}-\d{1,3})"
-            match = re.search(pattern, chapter_verse_ref)
+            pattern = r"([1-3A-Z][a-z][a-z] )(\d{1,3})(-)(\d{1,3})"  # "Psa 1-2"
+            match = re.search(pattern, full_ref)
             if match:
-                reading = book_number_and_name + "_" + match.group(1)
-                # print(reading)
-                # Omit verse references (Psa 119:1-24 -> 19_psalms_119)
+                # Thist section properly handles readings with multiple chapters,
+                #   "Gen 1-2"     -> "01_gen_1" and "01_gen_2"
+                #   "Psa 1-2"     -> "19_psalm_1" and "19_psalm_2"
+                #   "Psa 52-54"   -> "19_psalm_52", 19_psalm_53", and "19_psalm_54"
+                #   "Psa 123-125" -> "19_psalm_123", 19_psalm_124", and "19_psalm_125"
+                initial_chapter = int(match.group(2))
+                final_chapter = int(match.group(4))
+                for chapter in range(initial_chapter, final_chapter + 1):
+                    reading = book_number_and_name + "_" + str(chapter)
+                    write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
+                    write_file.write(
+                        mp3_path + book_number_and_name + "/" + reading + ".mp3\n"
+                    )
+
             else:
-                reading = book_number_and_name + "_" + chapter_verse_ref
-                # Properly handles readings of 1 full chapter:
-                #   "Psa 1" -> "19_psalm_1"
-                #   "Mat 1" -> "40_matthew_1"
+                pattern = r"(\d{1,3})(:\d{1,3}-\d{1,3})"
+                match = re.search(pattern, chapter_verse_ref)
+                if match:
+                    # This handles partial chapters: Psa 78:1-37, Psa 119:1-24,
+                    #   Pro 8:1-18, Mat 26:1-35, Luk 1:39-80, etc.
+                    # by omitting verse references (Psa 119:1-24 -> 19_psalms_119)
+                    reading = book_number_and_name + "_" + match.group(1)
+                else:
+                    # This properly handles readings of 1 full chapter:
+                    #   "Psa 1" -> "19_psalm_1"
+                    #   "Mat 1" -> "40_matthew_1"
+                    reading = book_number_and_name + "_" + chapter_verse_ref
 
-            # TODO: Properly handle readings with multiple chapters,
-            # like Psa 1-2, Psa 52-54, Psa 120-122, Psa 123-125, etc.
-            #              Currently        Desired
-            # "Gen 1-2" -> "01_gen_1-2"     "01_gen_1" and "01_gen_2"
-            # "Psa 1-2" -> "19_psalm_1-2"   "19_psalm_1" and "19_psalm_2"
+                    # TODO: Still need to properly handle readings w. mixed references:
+                    #   Psa 105:38-45;106:1-13, Psa 117;118:1-14, Psa 133;134;135:1-12, etc.
+                    # Currently, for all 3 of those references, only Psalms 105, 118,
+                    # and 135 are included.
+                    # HowTo: Split each full_ref at the ";",
+                    #   then handle each piced of the reference separately
+                    #   (Use functions to to handle the different types of references.)
 
-            # TODO: Properly handle readings with mixed references:
-            #   Psa 105:38-45;106:1-13, Psa 117;118:1-14, Psa 133;134;135:1-12, etc.
+                write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
+                write_file.write(
+                    mp3_path + book_number_and_name + "/" + reading + ".mp3\n"
+                )
 
-            write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
-            write_file.write(mp3_path + book_number_and_name + "/" + reading + ".mp3\n")
         write_file.write("#EXTINF:244,<unknown")
 
 

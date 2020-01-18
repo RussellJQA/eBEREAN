@@ -1,4 +1,9 @@
 """
+This Bible reading plan has the reader read:
+    Lord's Days: 5 New Testament chapters
+    Other Days: 3 Old Test chapters (or portions)
+
+This is a work in progress, not yet as fully implemented as the other reading plans.
 """
 
 import calendar
@@ -37,6 +42,9 @@ def LordsDayNT(daily_readings, year):
         book_abbr, chapter = reading.split()
         datedelta = 0 if (chapter_count % 5) else 7
         # Every 5th chapter, increment to next Lord's Day
+
+        # TODO: Properly handle merging of up to 5 references
+        # (5 NT chapters each Lord's Day)
         (daily_readings, date) = process_reading(
             daily_readings, date, book_abbr, chapter, datedelta
         )
