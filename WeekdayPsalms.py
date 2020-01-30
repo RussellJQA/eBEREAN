@@ -4,7 +4,6 @@ Create a Bible reading plan with readings from the Psalms for each weekday.
 
 import calendar
 import datetime
-import os
 
 from lib.bible_books import bible_books
 from lib.rmm_psalm_readings import rmm_modified_260_psalm_readings
@@ -51,8 +50,6 @@ def WeekdayPsalms(daily_readings, year):  # Weekday Worship (Psalms)
         (daily_readings, date) = process_reading(
             daily_readings, date, "Psa", extra_psalm_refs[i], datedelta
         )
-
-    return daily_readings
 
 
 def main():

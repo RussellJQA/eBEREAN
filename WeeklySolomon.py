@@ -4,9 +4,7 @@ Create a Bible reading plan with 1 of the 51 chapters from Solomon's writings
 split over 2 days (as needed).
 """
 
-import calendar
 import datetime
-import os
 
 from lib.bible_books import bible_books
 
@@ -15,7 +13,7 @@ from create_bible_plan import create_plan_with_playlists, process_reading
 
 bible_books_list = list(bible_books.keys())
 
-solomon = ["Proverbs", "Ecclesiastes", "SongOfSolomon"]
+solomon = ["Proverbs", "Ecclesiastes", "SongOfSolomon"]  # TODO: DRY - Don't duplicate
 
 
 def WeeklySolomon(daily_readings, year, day_of_week):  # Weekly Solomon's Readings
@@ -59,8 +57,6 @@ def WeeklySolomon(daily_readings, year, day_of_week):  # Weekly Solomon's Readin
         (daily_readings, date) = process_reading(
             daily_readings, date, book_abbr, chapter, 7
         )
-
-    return daily_readings
 
 
 def main():

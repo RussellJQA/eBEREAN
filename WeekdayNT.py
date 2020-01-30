@@ -5,7 +5,6 @@ For years with more than 260 (52*5) weekdays, 1 or more chapters are split over 
 
 import calendar
 import datetime
-import os
 
 from lib.bible_books import bible_books
 
@@ -66,8 +65,6 @@ def WeekdayNT(daily_readings, year):  # Weekday New Testament
         (daily_readings, date) = process_reading(
             daily_readings, date, book_abbr, chapter, datedelta
         )
-
-    return daily_readings
 
 
 def main():

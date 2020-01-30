@@ -7,7 +7,6 @@ Robert Murray M‘Cheyne (1813-1843), this plan orders them quite differently.
 
 import calendar
 import datetime
-import os
 
 from lib.bible_books import bible_books
 from lib.rmm_psalm_readings import rmm_original_104_psalm_readings
@@ -47,8 +46,6 @@ def WeekendPsalms(daily_readings, year):  # Weekend Worship (Psalms)
         (daily_readings, date) = process_reading(
             daily_readings, date, "Psa", extra_psalm_refs[i], datedelta
         )
-
-    return daily_readings
 
 
 def main():

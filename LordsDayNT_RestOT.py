@@ -6,9 +6,7 @@ This Bible reading plan has the reader read:
 This is a work in progress, not yet as fully implemented as the other reading plans.
 """
 
-import calendar
 import datetime
-import os
 
 from lib.bible_books import bible_books
 
@@ -49,8 +47,6 @@ def LordsDayNT(daily_readings, year):
         (daily_readings, date) = process_reading(
             daily_readings, date, book_abbr, chapter, datedelta
         )
-
-    return daily_readings
 
 
 def Rest_OT(daily_readings, year):

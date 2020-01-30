@@ -4,10 +4,6 @@ A consolidation of several Bible Reading plans:
     WeeklySolomon
 """
 
-import calendar
-import datetime
-import os
-
 from lib.bible_books import bible_books
 
 from create_bible_plan import create_plan_with_playlists, process_reading
@@ -16,8 +12,6 @@ from WeekdayNT import WeekdayNT
 from WeeklySolomon import WeeklySolomon
 
 bible_books_list = list(bible_books.keys())
-
-solomon = ["Proverbs", "Ecclesiastes", "SongOfSolomon"]
 
 
 def main():
