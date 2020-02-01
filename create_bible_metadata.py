@@ -20,6 +20,14 @@ Letters patent issued by King James with no expiration date means that to print 
 import os.path
 import glob
 import json
+import re
+import string
+
+
+def value_reverse_key(element):
+    sort_key = (-1 * element[1], element[0])
+    return sort_key
+
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 source_files = os.path.join(script_dir, "downloads", "kjv_chapter_files")
@@ -32,14 +40,28 @@ verse_counts_by_chapter = {}  # dict of verse counts, indexed by chapter
 
 kjv_chapter_files = sorted(glob.glob(os.path.join(source_files, "*.txt")))
 # sorted() because glob() may return the list in an arbitrary order
-for chapter_file in kjv_chapter_files:
 
+chapter_count = 0  # Used to limit output during development
+
+word_frequency = {}
+for chapter_file in kjv_chapter_files:
     read_file = open(chapter_file, "r")
     lines = read_file.readlines()
     full_book_name = lines[0][3:]
     verse_count = len(lines) - 2  # Exclude lines[0] and lines [1]
     # No need to exclude the blank line at the end of chapter files,
     # since readlines() already seems to ignore it.
+
+    for line in lines[2:]:
+        # https://stackoverflow.com/questions/12705293/regex-to-split-words-in-python
+        words = re.compile("([\w][\w]*'?\w?)").findall(line)
+
+        for word in words:
+            word_lower = word.lower()
+            if word_lower in word_frequency:
+                word_frequency[word_lower] += 1
+            else:
+                word_frequency[word_lower] = 1
 
     book_number_name_chapter = os.path.basename(chapter_file)[9:-9]
     # basename is, for example, eng-kjv_002_GEN_01_read.txt
@@ -71,6 +93,18 @@ for chapter_file in kjv_chapter_files:
 
     verse_counts_by_chapter[full_ref] = verse_count
 
+print("\n")
+word_frequency_sorted = sorted(word_frequency.items(), key=value_reverse_key)
+for elem in word_frequency_sorted:  # Iterate over the sorted sequence
+    print(elem[0], ":", elem[1])
+
+# TODO: Instead, split into lists of words for each frequency:
+#   ...
+#   Words of frequency 10
+#   Words of frequency 9
+#   ...
+#   Words of frequency 2
+#   Words of frequency 1
 
 with open(r"BibleMetaData\book_abbreviations.json", "w") as write_file:
     json.dump(book_abbrevs, write_file, indent=4)
