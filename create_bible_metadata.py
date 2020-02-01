@@ -21,7 +21,6 @@ import os.path
 import glob
 import json
 import re
-import string
 
 
 def main():
@@ -45,18 +44,19 @@ def main():
 
     word_frequency = {}
     for chapter_file in kjv_chapter_files:
-        read_file = open(chapter_file, "r")
+        read_file = open(chapter_file, "r", encoding="utf-8")
         lines = read_file.readlines()
-        full_book_name = lines[0][3:]
+        # full_book_name = lines[0][3:]
+        full_book_name = lines[0][1:]
         verse_count = len(lines) - 2  # Exclude lines[0] and lines [1]
         # No need to exclude the blank line at the end of chapter files,
         # since readlines() already seems to ignore it.
 
         for line in lines[2:]:
-            # https://stackoverflow.com/questions/12705293/regex-to-split-words-in-python
-            words = re.compile("([\w][\w]*'?\w?)").findall(line)
-
-            for word in words:
+            line = re.sub("[¶’]\S*", "", line).strip()
+            # Eliminate paragraph markers, possessives, and leading/trailing blanks
+            words = re.sub("[^a-z\- ]+", "", line, flags=re.IGNORECASE)
+            for word in words.split():
                 word_lower = word.lower()
                 if word_lower in word_frequency:
                     word_frequency[word_lower] += 1
@@ -100,8 +100,6 @@ def main():
     for element in sorted(word_frequency.items(), key=value_reverse_key):
         # Split into lists of words for each frequency:
         word = element[0]
-        # TODO: Print error log of any words containing any non-alphabetic
-        #       characters other than an apostrophe.
         occurrences = element[1]  # For "the", occurrences is 64016
         if previous_occurrences and occurrences != previous_occurrences:
             word_frequency_lists[previous_occurrences] = words_with_this_frequency[:]
