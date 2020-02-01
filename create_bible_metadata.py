@@ -95,25 +95,20 @@ def main():
 
     print("\n")
     previous_occurrences = 0
-    word_frequency_sorted = sorted(word_frequency.items(), key=value_reverse_key)
-    for count, element in enumerate(word_frequency_sorted, start=1):
-        # Iterate over the sorted sequence
-        # TODO: Print error log of any words containing any non-alphabetic characters
-        #       other than an apostrophe.
-        if count <= 500:
-            occurrences = element[1]  # For "the", this is 64016
-            if occurrences != previous_occurrences:
-                print(f"\n{occurrences}")
-            print(element[0])
-            previous_occurrences = occurrences
-
-    # TODO: Instead, split into lists of words for each frequency:
-    #   ...
-    #   Words of frequency 10
-    #   Words of frequency 9
-    #   ...
-    #   Words of frequency 2
-    #   Words of frequency 1
+    words_with_this_frequency = []
+    word_frequency_lists = {}
+    for element in sorted(word_frequency.items(), key=value_reverse_key):
+        # Split into lists of words for each frequency:
+        word = element[0]
+        # TODO: Print error log of any words containing any non-alphabetic
+        #       characters other than an apostrophe.
+        occurrences = element[1]  # For "the", occurrences is 64016
+        if previous_occurrences and occurrences != previous_occurrences:
+            word_frequency_lists[previous_occurrences] = words_with_this_frequency[:]
+            words_with_this_frequency.clear()
+        words_with_this_frequency.append(word)
+        previous_occurrences = occurrences
+    word_frequency_lists[1] = words_with_this_frequency[:]
 
     with open(r"BibleMetaData\book_abbreviations.json", "w") as write_file:
         json.dump(book_abbrevs, write_file, indent=4)
@@ -125,6 +120,9 @@ def main():
 
     with open(r"BibleMetaData\verse_counts_by_chapter.json", "w") as write_file:
         json.dump(verse_counts_by_chapter, write_file, indent=4)
+
+    with open(r"BibleMetaData\word_frequency_lists.json", "w") as write_file:
+        json.dump(word_frequency_lists, write_file, indent=4)
 
 
 if __name__ == "__main__":
