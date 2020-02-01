@@ -94,11 +94,18 @@ def main():
         verse_counts_by_chapter[full_ref] = verse_count
 
     print("\n")
+    previous_occurrences = 0
     word_frequency_sorted = sorted(word_frequency.items(), key=value_reverse_key)
-    for elem in word_frequency_sorted:  # Iterate over the sorted sequence
+    for count, element in enumerate(word_frequency_sorted, start=1):
+        # Iterate over the sorted sequence
         # TODO: Print error log of any words containing any non-alphabetic characters
         #       other than an apostrophe.
-        print(elem[0], ":", elem[1])
+        if count <= 500:
+            occurrences = element[1]  # For "the", this is 64016
+            if occurrences != previous_occurrences:
+                print(f"\n{occurrences}")
+            print(element[0])
+            previous_occurrences = occurrences
 
     # TODO: Instead, split into lists of words for each frequency:
     #   ...
