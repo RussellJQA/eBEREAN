@@ -24,8 +24,8 @@ import re
 
 
 def main():
-    def value_reverse_key(element):
-        sort_key = (-1 * element[1], element[0])
+    def value__key(element):
+        sort_key = (element[1], element[0])
         return sort_key
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -40,14 +40,11 @@ def main():
     kjv_chapter_files = sorted(glob.glob(os.path.join(source_files, "*.txt")))
     # sorted() because glob() may return the list in an arbitrary order
 
-    chapter_count = 0  # Used to limit output during development
-
     word_frequency = {}
     for chapter_file in kjv_chapter_files:
         read_file = open(chapter_file, "r", encoding="utf-8")
         lines = read_file.readlines()
-        # full_book_name = lines[0][3:]
-        full_book_name = lines[0][1:]
+        full_book_name = lines[0][1:]  # Strip off unwanted initial Unicode character
         verse_count = len(lines) - 2  # Exclude lines[0] and lines [1]
         # No need to exclude the blank line at the end of chapter files,
         # since readlines() already seems to ignore it.
@@ -94,19 +91,30 @@ def main():
         verse_counts_by_chapter[full_ref] = verse_count
 
     print("\n")
-    previous_occurrences = 0
+    total_words = 0
     words_with_this_frequency = []
     word_frequency_lists = {}
-    for element in sorted(word_frequency.items(), key=value_reverse_key):
+    previous_occurrences = 0
+    occurrences = 0
+    for element in sorted(word_frequency.items(), key=value__key):
         # Split into lists of words for each frequency:
         word = element[0]
         occurrences = element[1]  # For "the", occurrences is 64016
+        total_words += occurrences
         if previous_occurrences and occurrences != previous_occurrences:
             word_frequency_lists[previous_occurrences] = words_with_this_frequency[:]
             words_with_this_frequency.clear()
         words_with_this_frequency.append(word)
         previous_occurrences = occurrences
-    word_frequency_lists[1] = words_with_this_frequency[:]
+    word_frequency_lists[occurrences] = words_with_this_frequency[:]
+    word_frequency_lists[total_words] = ["TOTAL WORDS"]
+
+    # TODO: When looping through the dictionary, add up the number of words
+    #       and compare to the entry for "TOTAL WORDS"
+
+    word_frequency_lists_reversed = {}
+    for key, value in sorted(word_frequency_lists.items(), reverse=True):
+        word_frequency_lists_reversed[key] = value
 
     with open(r"BibleMetaData\book_abbreviations.json", "w") as write_file:
         json.dump(book_abbrevs, write_file, indent=4)
@@ -120,9 +128,8 @@ def main():
         json.dump(verse_counts_by_chapter, write_file, indent=4)
 
     with open(r"BibleMetaData\word_frequency_lists.json", "w") as write_file:
-        json.dump(word_frequency_lists, write_file, indent=4)
+        json.dump(word_frequency_lists_reversed, write_file, indent=4)
 
 
 if __name__ == "__main__":
     main()
-
