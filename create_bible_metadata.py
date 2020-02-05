@@ -29,6 +29,12 @@ def main():
         return sort_key
 
     def build_word_frequency_lists(word_frequency):
+
+        # Write list of KJV words, each paired (in a list) with its # of occurrences
+        # [["a", 8282], ["aaron", 350], ["aaronites", 2], ... ["zuzims", 1]]
+        with open(r"BibleMetaData\word_frequency.json", "w") as write_file:
+            json.dump(sorted(word_frequency.items()), write_file)
+
         total_words = 0  # The final value of total_words is 790,663
         words_with_this_frequency = []
         word_frequency_lists = {}
@@ -110,7 +116,7 @@ def main():
             # Eliminate paragraph markers, possessives, and leading/trailing blanks
             words = re.sub("[^a-z\- ]+", "", line, flags=re.IGNORECASE)
             for word in words.split():
-                word_lower = word.lower()
+                word_lower = word.lower()  # TODO: Exclude "LORD" (, etc.?)
                 if word_lower in word_frequency:
                     word_frequency[word_lower] += 1
                 else:
