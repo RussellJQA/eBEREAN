@@ -1,4 +1,5 @@
 # Chapter files extracted from https://ebible.org/Scriptures/eng-kjv_readaloud.zip
+# (linked to at https://ebible.org/kjv/)
 
 # Above link and the following copyright information are from:
 #   https://ebible.org/find/show.php?id=eng-kjv
@@ -24,23 +25,33 @@ import re
 
 
 def main():
-    def value__key(element):
-        sort_key = (element[1], element[0])
+    def key_value(element):
+        sort_key = (element[0], element[1])
         return sort_key
 
-    def build_word_frequency_lists(word_frequency):
+    def desc_value_asc_key(element):
+        sort_key = (-1 * element[1], element[0])
+        return sort_key
 
-        # Write list of KJV words, each paired (in a list) with its # of occurrences
-        # [["a", 8282], ["aaron", 350], ["aaronites", 2], ... ["zuzims", 1]]
+    def build_word_frequency_lists(word_frequency, word_frequency_all_chapters):
+
+        # Write dict of KJV words, each paired (in a list) with its # of occurrences
+        # {["a", 8282], ["aaron", 350], ["aaronites", 2], ... ["zuzims", 1]}
+        word_frequency_sorted = {}
+        for key, value in sorted(word_frequency.items()):
+            word_frequency_sorted[key] = value
         with open(r"BibleMetaData\word_frequency.json", "w") as write_file:
-            json.dump(sorted(word_frequency.items()), write_file)
+            json.dump(word_frequency_sorted, write_file)
+
+        with open(r"BibleMetaData\word_frequency_all_chapters.json", "w") as write_file:
+            json.dump(word_frequency_all_chapters, write_file, indent=4)
 
         total_words = 0  # The final value of total_words is 790,663
         words_with_this_frequency = []
         word_frequency_lists = {}
         prev_occurrences = 0
         occurrences = 0
-        for element in sorted(word_frequency.items(), key=value__key):
+        for element in sorted(word_frequency.items(), key=desc_value_asc_key):
             # Split into lists of words for each frequency:
             word = element[0]
             occurrences = element[1]  # For "the", occurrences is 64016
@@ -51,12 +62,10 @@ def main():
             words_with_this_frequency.append(word)
             prev_occurrences = occurrences
         word_frequency_lists[occurrences] = words_with_this_frequency[:]
-        word_frequency_lists[total_words] = ["TOTAL WORDS"]
+        word_frequency_lists = {total_words: ["TOTAL WORDS"], **word_frequency_lists}
 
         total_words2 = 0  # Essentially, recalc total_words a 2nd way, for comparison.
-        word_frequency_lists_reversed = {}
         for key, value in sorted(word_frequency_lists.items(), reverse=True):
-            word_frequency_lists_reversed[key] = value
             if value != ["TOTAL WORDS"]:
                 total_words2 += int(key) * len(value)
                 # Increment by number of occurrences * number of words with that number
@@ -64,7 +73,7 @@ def main():
             print(f"total_words ({total_words}) != to total_words2 ({total_words2})")
 
         with open(r"BibleMetaData\word_frequency_lists.json", "w") as write_file:
-            json.dump(word_frequency_lists_reversed, write_file, indent=4)
+            json.dump(word_frequency_lists, write_file, indent=4)
 
     book_abbrevs = {}
     verse_counts_by_chapter = {}  # dict of verse counts, indexed by chapter
@@ -72,6 +81,8 @@ def main():
     verse_counts_by_count = {}  # dict of full_refs, indexed by verse counts
     verse_counts_by_desc_count = {}  # above dict, sorted by decreasing verse count
     word_frequency = {}
+    word_frequency_this_chapter = {}
+    word_frequency_all_chapters = {}
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     source_files = os.path.join(script_dir, "downloads", "kjv_chapter_files")
@@ -111,18 +122,28 @@ def main():
             verse_counts_by_count[verse_count] = [full_ref]
 
         # Calculate word frequencies
+        word_frequency_this_chapter = {}
         for line in lines[2:]:
             line = re.sub("[¶’]\S*", "", line).strip()
             # Eliminate paragraph markers, possessives, and leading/trailing blanks
             words = re.sub("[^a-z\- ]+", "", line, flags=re.IGNORECASE)
             for word in words.split():
                 word_lower = word.lower()  # TODO: Exclude "LORD" (, etc.?)
+
                 if word_lower in word_frequency:
                     word_frequency[word_lower] += 1
                 else:
                     word_frequency[word_lower] = 1
+                if word_lower in word_frequency_this_chapter:
+                    word_frequency_this_chapter[word_lower] += 1
+                else:
+                    word_frequency_this_chapter[word_lower] = 1
 
-    build_word_frequency_lists(word_frequency)
+        word_frequency_all_chapters[full_ref] = sorted(
+            word_frequency_this_chapter.items()
+        )
+
+    build_word_frequency_lists(word_frequency, word_frequency_all_chapters)
 
     with open(r"BibleMetaData\book_abbreviations.json", "w") as write_file:
         json.dump(book_abbrevs, write_file, indent=4)
