@@ -64,34 +64,30 @@ def build_frequency_lists(frequency):
     return frequency_lists
 
 
-def build_frequency_lists(frequency):
-    total_words = 0  # The final value of total_words is 790,663
-    words_with_this_frequency = []
-    frequency_lists = {}
-    prev_occurrences = 0
-    occurrences = 0
-    for element in sorted(frequency.items(), key=desc_value_asc_key):
-        # Split into lists of words for each frequency:
-        word = element[0]
-        occurrences = element[1]  # For "the", occurrences is 64016
-        total_words += occurrences
-        if prev_occurrences and occurrences != prev_occurrences:
-            frequency_lists[prev_occurrences] = words_with_this_frequency[:]
-            words_with_this_frequency.clear()
-        words_with_this_frequency.append(word)
-        prev_occurrences = occurrences
-    frequency_lists[occurrences] = words_with_this_frequency[:]
-    frequency_lists = {total_words: ["TOTAL WORDS"], **frequency_lists}
+def calc_word_freq(lines, word_frequency):
+    # TODO (possibly): Generate some statistics like mean, median, and mode frequency
+    # TODO (possibly): Generate alternative versions with and without italicized words
+    frequency_this_chapter = {}
+    for line in lines:
+        line = re.sub("[¶’]\S*", "", line).strip()
+        # Eliminate paragraph markers, possessives, and leading/trailing blanks
+        words = re.sub("[^a-z\- ]+", "", line, flags=re.IGNORECASE)
+        for word in words.split():
+            word_lower = word.lower()
+            # TODO: Exclude "LORD" (, etc.?)
+            #   Or, more generally, like:
+            #       ((len(word) >= 2) and (word.isupper()):
 
-    total_words2 = 0  # Essentially, recalc total_words a 2nd way, for comparison.
-    for key, value in sorted(frequency_lists.items(), reverse=True):
-        if value != ["TOTAL WORDS"]:
-            total_words2 += int(key) * len(value)
-            # Increment by number of occurrences * number of words with that number
-    if total_words != total_words2:
-        print(f"total_words ({total_words}) != to total_words2 ({total_words2})")
+            if word_lower in word_frequency:
+                word_frequency[word_lower] += 1
+            else:
+                word_frequency[word_lower] = 1
+            if word_lower in frequency_this_chapter:
+                frequency_this_chapter[word_lower] += 1
+            else:
+                frequency_this_chapter[word_lower] = 1
 
-    return frequency_lists
+    return (word_frequency, frequency_this_chapter)
 
 
 def write_word_frequency_files(word_frequency, word_frequency_lists_chapters):
@@ -110,27 +106,6 @@ def write_word_frequency_files(word_frequency, word_frequency_lists_chapters):
 
     with open(r"BibleMetaData\word_frequency_lists_chapters.json", "w") as write_file:
         json.dump(word_frequency_lists_chapters, write_file, indent=4)
-
-
-def calc_word_freq(lines, word_frequency):
-    frequency_this_chapter = {}
-    for line in lines:
-        line = re.sub("[¶’]\S*", "", line).strip()
-        # Eliminate paragraph markers, possessives, and leading/trailing blanks
-        words = re.sub("[^a-z\- ]+", "", line, flags=re.IGNORECASE)
-        for word in words.split():
-            word_lower = word.lower()  # TODO: Exclude "LORD" (, etc.?)
-
-            if word_lower in word_frequency:
-                word_frequency[word_lower] += 1
-            else:
-                word_frequency[word_lower] = 1
-            if word_lower in frequency_this_chapter:
-                frequency_this_chapter[word_lower] += 1
-            else:
-                frequency_this_chapter[word_lower] = 1
-
-    return (word_frequency, frequency_this_chapter)
 
 
 def calc_verse_data(book_abbrevs, lines, chapter_file):
