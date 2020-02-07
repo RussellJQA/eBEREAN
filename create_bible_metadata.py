@@ -112,6 +112,44 @@ def write_word_frequency_files(word_frequency, word_frequency_lists_chapters):
         json.dump(word_frequency_lists_chapters, write_file, indent=4)
 
 
+def calc_word_freq(lines, word_frequency):
+    frequency_this_chapter = {}
+    for line in lines:
+        line = re.sub("[¶’]\S*", "", line).strip()
+        # Eliminate paragraph markers, possessives, and leading/trailing blanks
+        words = re.sub("[^a-z\- ]+", "", line, flags=re.IGNORECASE)
+        for word in words.split():
+            word_lower = word.lower()  # TODO: Exclude "LORD" (, etc.?)
+
+            if word_lower in word_frequency:
+                word_frequency[word_lower] += 1
+            else:
+                word_frequency[word_lower] = 1
+            if word_lower in frequency_this_chapter:
+                frequency_this_chapter[word_lower] += 1
+            else:
+                frequency_this_chapter[word_lower] = 1
+
+    return (word_frequency, frequency_this_chapter)
+
+
+def calc_verse_data(book_abbrevs, lines, chapter_file):
+    book_number_name_chapter = os.path.basename(chapter_file)[9:-9]
+    # basename is, for example, eng-kjv_002_GEN_01_read.txt
+    book_abbr = book_number_name_chapter[3:6].title()  # Gen, Exo, ..., Rev
+    if book_abbr not in book_abbrevs:
+        full_book_name = lines[0][1:]  # Strip unwanted initial Unicode character
+        book_abbrevs[book_abbr] = full_book_name
+    chapter_number = book_number_name_chapter[7:10].lstrip("0").rstrip("_")
+    # Filenames normally contain 2-digit chapter numbers, but have 3 for Psalms
+    # Remove leading '0's (as from '01' and '001') and trailing '_'s (as from '01_')
+
+    # Calculate verse counts
+    full_ref = book_abbr + " " + chapter_number
+    verse_count = len(lines) - 2  # Exclude lines[0] and lines [1]
+    return (full_ref, verse_count)
+
+
 def main():
     book_abbrevs = {}
     verse_counts_by_chapter = {}  # dict of verse counts, indexed by chapter
@@ -127,60 +165,21 @@ def main():
     kjv_chapter_files = sorted(glob.glob(os.path.join(source_files, "*.txt")))
     # sorted() because glob() may return the list in an arbitrary order
 
-    chapter_count = 0
     for chapter_file in kjv_chapter_files:
-        chapter_count += 1
         read_file = open(chapter_file, "r", encoding="utf-8")
         lines = read_file.readlines()
         # There's no need to exclude the blank line at the end of chapter files,
         # since readlines() already seems to ignore it.
 
-        book_number_name_chapter = os.path.basename(chapter_file)[9:-9]
-        # basename is, for example, eng-kjv_002_GEN_01_read.txt
-        book_number = int(book_number_name_chapter[0:2]) - 1
-        # Sets the book number for 'eng-kjv_002_GEN_01_read.txt' to 1
-        # Sets the book number for 'eng-kjv_070_MAT_01_read.txt' to 69
-        if book_number >= 40:
-            book_number -= 29
-        # Sets the book number for 'eng-kjv_070_MAT_01_read.txt' to (70 - 1) - 29 = 40
-        book_abbr = book_number_name_chapter[3:6].title()  # Gen, Exo, ..., Rev
-        if book_abbr not in book_abbrevs:
-            full_book_name = lines[0][1:]  # Strip unwanted initial Unicode character
-            book_abbrevs[book_abbr] = full_book_name
-        chapter_number = book_number_name_chapter[7:10].lstrip("0").rstrip("_")
-        # Filenames normally contain 2-digit chapter numbers, but have 3 for Psalms
-        # Remove leading '0's (as from '01' and '001') and trailing '_'s (as from '01_')
-        # print(f'Book number: {book_number}, abbr: {book_abbr}, chapter: {chapter_number}')
-
-        # Calculate verse counts
-        full_ref = book_abbr + " " + chapter_number
-        verse_count = len(lines) - 2  # Exclude lines[0] and lines [1]
+        (full_ref, verse_count) = calc_verse_data(book_abbrevs, lines, chapter_file)
         verse_counts_by_chapter[full_ref] = verse_count
         if verse_count in verse_counts_by_count:
             verse_counts_by_count[verse_count].append(full_ref)
         else:
             verse_counts_by_count[verse_count] = [full_ref]
 
-        # TODO: Put this into a function
-        # Calculate word frequencies
-        frequency_this_chapter = {}
-        for line in lines[2:]:
-            line = re.sub("[¶’]\S*", "", line).strip()
-            # Eliminate paragraph markers, possessives, and leading/trailing blanks
-            words = re.sub("[^a-z\- ]+", "", line, flags=re.IGNORECASE)
-            for word in words.split():
-                word_lower = word.lower()  # TODO: Exclude "LORD" (, etc.?)
-
-                if word_lower in word_frequency:
-                    word_frequency[word_lower] += 1
-                else:
-                    word_frequency[word_lower] = 1
-                if word_lower in frequency_this_chapter:
-                    frequency_this_chapter[word_lower] += 1
-                else:
-                    frequency_this_chapter[word_lower] = 1
-
-        frequency_lists_this_chapter = build_frequency_lists(frequency_this_chapter)
+        (word_frequency, freq_this_chapter) = calc_word_freq(lines[2:], word_frequency)
+        frequency_lists_this_chapter = build_frequency_lists(freq_this_chapter)
         word_frequency_lists_chapters[full_ref] = frequency_lists_this_chapter
 
     write_word_frequency_files(word_frequency, word_frequency_lists_chapters)
