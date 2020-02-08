@@ -10,6 +10,13 @@ import os
 bible_metadata_folder = os.path.join(os.getcwd(), "BibleMetaData")
 
 
+def get_book_num(book_abrev):
+    read_fn = os.path.join(bible_metadata_folder, "book_numbers.json")
+    with open(read_fn, "r") as read_file:
+        book_nums = json.load(read_file)
+        return book_nums[book_abrev]
+
+
 def get_word_frequency():
     read_fn = os.path.join(bible_metadata_folder, "word_frequency.json")
     with open(read_fn, "r") as read_file:
@@ -46,9 +53,18 @@ def main():
         for (key, word_frequencies) in word_frequency_lists_chapters.items():
             chapter_words = {}
             words_in_chapter = int(next(iter(word_frequencies)))
-            csv_fn = os.path.join(chapter_words_folder, key + " word_freq.csv")
-            with open(csv_fn, mode="w") as csv_file:
+            book_num_padded = str(get_book_num(key[0:3])).zfill(2)  # 0-pad
+            csv_basename = f"{book_num_padded}_{key} word_freq.csv"
+            csv_fn = os.path.join(chapter_words_folder, csv_basename)
+
+            with open(csv_fn, mode="w", newline="") as csv_file:
+                # newline="" prevents blank lines from being added between rows
                 writer = csv.writer(csv_file, delimiter=",", quotechar='"')
+                writer.writerow(["word", "numInChap", "numInKjv", "relativeFreq"])
+                #   Column header row
+                words_tot_hdr = f"TOTAL ({key})"
+                writer.writerow([words_tot_hdr, words_in_chapter, overall_frequency])
+                #   Totals row
                 for (chapter_frequency, words) in word_frequencies.items():
                     if words != ["TOTAL WORDS"]:
                         chap_freq = int(chapter_frequency)
@@ -69,8 +85,7 @@ def main():
                     chapter_words.items(), key=desc_value2_asc_key
                 ):
                     relative_word_frequency[chapter_word] = values
-                    row = [chapter_word, values[0], values[1], values[2]]
-                    writer.writerow(row)
+                    writer.writerow([chapter_word, values[0], values[1], values[2]])
                 chapters_relative_word_frequency[key] = relative_word_frequency
 
     with open(
