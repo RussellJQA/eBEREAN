@@ -162,6 +162,12 @@ def main():
     with open(r"BibleMetaData\book_abbreviations.json", "w") as write_file:
         json.dump(book_abbrevs, write_file, indent=4)
 
+    book_nums = {}
+    for book_num, abbrev in enumerate(book_abbrevs.keys(), start=1):
+        book_nums[abbrev] = book_num
+    with open(r"BibleMetaData\book_numbers.json", "w") as write_file:
+        json.dump(book_nums, write_file, indent=4)
+
     with open(r"BibleMetaData\verse_counts_by_chapter.json", "w") as write_file:
         json.dump(verse_counts_by_chapter, write_file, indent=4)
 
