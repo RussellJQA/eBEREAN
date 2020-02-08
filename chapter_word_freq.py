@@ -47,15 +47,21 @@ def main():
     if not os.path.isdir(chapter_words_folder):
         os.mkdir(chapter_words_folder)
 
+    previous_book_abbrev = ""
+    book_folder = ""
     read_fn = os.path.join(bible_metadata_folder, "word_frequency_lists_chapters.json")
     with open(read_fn, "r") as read_file:
         word_frequency_lists_chapters = json.load(read_file)
         for (key, word_frequencies) in word_frequency_lists_chapters.items():
+            book_abbrev = key[0:3]
+            book_num_name = f"{str(get_book_num(book_abbrev)).zfill(2)}_{book_abbrev}"
+            if previous_book_abbrev != book_abbrev:
+                book_folder = os.path.join(chapter_words_folder, book_num_name)
+                if not os.path.isdir(book_folder):
+                    os.mkdir(book_folder)
             chapter_words = {}
             words_in_chapter = int(next(iter(word_frequencies)))
-            book_num_padded = str(get_book_num(key[0:3])).zfill(2)  # 0-pad
-            csv_basename = f"{book_num_padded}_{key} word_freq.csv"
-            csv_fn = os.path.join(chapter_words_folder, csv_basename)
+            csv_fn = os.path.join(book_folder, f"{key} word_freq.csv")
 
             with open(csv_fn, mode="w", newline="") as csv_file:
                 # newline="" prevents blank lines from being added between rows
@@ -63,8 +69,10 @@ def main():
                 writer.writerow(["word", "numInChap", "numInKjv", "relativeFreq"])
                 #   Column header row
                 words_tot_hdr = f"TOTAL ({key})"
-                writer.writerow([words_tot_hdr, words_in_chapter, overall_frequency])
-                #   Totals row
+                writer.writerow([words_tot_hdr, words_in_chapter, overall_frequency, 0])
+                #   Totals row (The row's final value was added to allow Github to
+                #     "make this file beautiful and searchable"
+                #     (to display it as a table, and allow it to be searchable).)
                 for (chapter_frequency, words) in word_frequencies.items():
                     if words != ["TOTAL WORDS"]:
                         chap_freq = int(chapter_frequency)
