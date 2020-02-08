@@ -61,7 +61,8 @@ def main():
                     os.mkdir(book_folder)
             chapter_words = {}
             words_in_chapter = int(next(iter(word_frequencies)))
-            csv_fn = os.path.join(book_folder, f"{key} word_freq.csv")
+            chapter = key[4:].zfill(3)  # 0-pad for consistent cross-platform sorting
+            csv_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.csv")
 
             with open(csv_fn, mode="w", newline="") as csv_file:
                 # newline="" prevents blank lines from being added between rows
