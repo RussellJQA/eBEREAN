@@ -24,6 +24,13 @@ def get_book_nums():
         return book_nums
 
 
+def get_verse_counts():
+    read_fn = os.path.join(bible_metadata_folder, "verse_counts_by_chapter.json")
+    with open(read_fn, "r") as read_file:
+        verse_counts = json.load(read_file)
+        return verse_counts
+
+
 def print_word_info(word, values):
     (chap_freq, word_freq, rel_freq) = values
     print(f"{word}: chapter: {chap_freq}, Bible: {word_freq}, relative: {rel_freq}")
@@ -44,6 +51,7 @@ def main():
     word_frequency = get_word_frequency()
     chapters_relative_word_frequency = {}
     book_nums = get_book_nums()
+    verse_counts = get_verse_counts()
 
     chapter_words_folder = os.path.join(bible_metadata_folder, "ChapterWords")
     if not os.path.isdir(chapter_words_folder):
@@ -72,12 +80,14 @@ def main():
                 writer.writerow(["word", "numInChap", "numInKjv", "relativeFreq"])
                 #   Column header row
                 words_tot_hdr = f"TOTAL ({key})"
-                writer.writerow([words_tot_hdr, words_in_chapter, overall_frequency, 0])
-                #   Totals row (I gave the row a (dummy) final value to
+                num_verses = f"{verse_counts[key]} verses"
+                #   The number of verses in the chapter (with " verses" for context)
+                #   as in "176 verses" for Psalm 119.
+                row = [words_tot_hdr, words_in_chapter, overall_frequency, num_verses]
+                #   Totals row: I gave the row a final value to allow GitHub to
                 #     "make this file beautiful and searchable"
-                #     (to display it as a table, and allow it to be searchable).)
-                # TODO: Replace the dummy value with the number of verses in the chapter
-                #   Specify " verses" for context, as in (for Psalm 119) "176 verses"
+                #     (to display it as a table, and allow it to be searchable).
+                writer.writerow(row)
                 for (chapter_frequency, words) in word_frequencies.items():
                     if words != ["TOTAL WORDS"]:
                         chap_freq = int(chapter_frequency)
