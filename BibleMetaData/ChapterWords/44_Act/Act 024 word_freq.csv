@@ -1,5 +1,6 @@
 word,numInChap,numInKjv,relativeFreq
-TOTAL (Act 24),640,790663,0
+TOTAL (Act 24),640,790663,27 verses
+tertullus,2,2,1235.4109375
 assented,1,1,1235.4109375
 cheerfully,1,1,1235.4109375
 clemency,1,1,1235.4109375
@@ -15,7 +16,6 @@ porcius,1,1,1235.4109375
 providence,1,1,1235.4109375
 ringleader,1,1,1235.4109375
 tedious,1,1,1235.4109375
-tertullus,2,2,1235.4109375
 thankfulness,1,1,1235.4109375
 lysias,2,3,823.6072916666667
 felix,6,9,823.6072916666666

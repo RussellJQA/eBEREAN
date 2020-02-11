@@ -73,19 +73,19 @@ def calc_word_freq(lines, word_frequency):
         # Eliminate paragraph markers, possessives, and leading/trailing blanks
         words = re.sub("[^a-z\- ]+", "", line, flags=re.IGNORECASE)
         for word in words.split():
-            word_lower = word.lower()
-            # TODO: Exclude "LORD" (, etc.?)
-            #   Or, more generally, like:
-            #       ((len(word) >= 2) and (word.isupper()):
+            if word != "LORD":  # Differentiate between "lord"/"Lord" and "LORD"
+                # TODO: Possibly do something more generic, like:
+                #       if not ((len(word) >= 2) and (word == word.isupper()):
+                word = word.lower()
 
-            if word_lower in word_frequency:
-                word_frequency[word_lower] += 1
+            if word in word_frequency:
+                word_frequency[word] += 1
             else:
-                word_frequency[word_lower] = 1
-            if word_lower in frequency_this_chapter:
-                frequency_this_chapter[word_lower] += 1
+                word_frequency[word] = 1
+            if word in frequency_this_chapter:
+                frequency_this_chapter[word] += 1
             else:
-                frequency_this_chapter[word_lower] = 1
+                frequency_this_chapter[word] = 1
 
     return (word_frequency, frequency_this_chapter)
 
