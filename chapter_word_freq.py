@@ -10,18 +10,18 @@ import os
 bible_metadata_folder = os.path.join(os.getcwd(), "BibleMetaData")
 
 
-def get_book_num(book_abrev):
-    read_fn = os.path.join(bible_metadata_folder, "book_numbers.json")
-    with open(read_fn, "r") as read_file:
-        book_nums = json.load(read_file)
-        return book_nums[book_abrev]
-
-
 def get_word_frequency():
     read_fn = os.path.join(bible_metadata_folder, "word_frequency.json")
     with open(read_fn, "r") as read_file:
         word_frequency = json.load(read_file)
         return word_frequency
+
+
+def get_book_nums():
+    read_fn = os.path.join(bible_metadata_folder, "book_numbers.json")
+    with open(read_fn, "r") as read_file:
+        book_nums = json.load(read_file)
+        return book_nums
 
 
 def print_word_info(word, values):
@@ -39,9 +39,11 @@ def desc_value2_asc_key(element):
 
 
 def main():
+
     overall_frequency = 790663
     word_frequency = get_word_frequency()
     chapters_relative_word_frequency = {}
+    book_nums = get_book_nums()
 
     chapter_words_folder = os.path.join(bible_metadata_folder, "ChapterWords")
     if not os.path.isdir(chapter_words_folder):
@@ -54,7 +56,7 @@ def main():
         word_frequency_lists_chapters = json.load(read_file)
         for (key, word_frequencies) in word_frequency_lists_chapters.items():
             book_abbrev = key[0:3]
-            book_num_name = f"{str(get_book_num(book_abbrev)).zfill(2)}_{book_abbrev}"
+            book_num_name = f"{str(book_nums[book_abbrev]).zfill(2)}_{book_abbrev}"
             if previous_book_abbrev != book_abbrev:
                 book_folder = os.path.join(chapter_words_folder, book_num_name)
                 if not os.path.isdir(book_folder):
@@ -71,9 +73,11 @@ def main():
                 #   Column header row
                 words_tot_hdr = f"TOTAL ({key})"
                 writer.writerow([words_tot_hdr, words_in_chapter, overall_frequency, 0])
-                #   Totals row (The row's final value was added to allow Github to
+                #   Totals row (I gave the row a (dummy) final value to
                 #     "make this file beautiful and searchable"
                 #     (to display it as a table, and allow it to be searchable).)
+                # TODO: Replace the dummy value with the number of verses in the chapter
+                #   Specify " verses" for context, as in (for Psalm 119) "176 verses"
                 for (chapter_frequency, words) in word_frequencies.items():
                     if words != ["TOTAL WORDS"]:
                         chap_freq = int(chapter_frequency)
