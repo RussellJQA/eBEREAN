@@ -41,7 +41,22 @@ def print_word_info(word, values):
 
 
 def desc_value2_asc_key(element):
-    sort_key = (-1 * element[1][2], element[0])
+    sort_key = (-1 * element[1][2], -1 * element[1][0], element[0])
+    """
+    Below, see the sort_key calculation for 2 rows of file "exo 030 word_freq.csv":
+        composition,2,2,815.1164948453609
+            element == ["composition", [1,1,815.1164948453609]]
+            -1 * element[1][2] == -815.1164948453609
+            -1 * element[1][0] == -2
+            element[0] == "composition"
+            sort_key == (-815.1164948453609, -2, "composition")
+        atonements,1,1,815.1164948453609
+            element == ["atonements", [1,1,815.1164948453609]]
+            -1 * element[1][2] == -815.1164948453609
+            -1 * element[1][0] == -1
+            element[0] == "atonements"
+            sort_key == (-815.1164948453609, -1, "atonements")
+    """
     return sort_key
 
 
