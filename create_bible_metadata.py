@@ -24,17 +24,55 @@ import os.path
 import re
 
 
+def calc_and_write_book_abbrevs():
+
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    source_files = os.path.join(script_dir, "downloads", "kjv_chapter_files")
+    kjv_chapter_01_files = glob.glob(os.path.join(source_files, "*_01_read.txt"))
+    #   List files for the 1st chapter of every Bible book except for Psalms
+    kjv_chapter_01_files.extend(glob.glob(os.path.join(source_files, "*_001_read.txt")))
+    #   Append name of the file for the 1st chapter of Psalms
+    kjv_chapter_01_files.sort()
+
+    book_abbrevs = {}
+    for chapter_01 in kjv_chapter_01_files:
+        with open(chapter_01, "r", encoding="utf-8") as read_file:
+            book_abbr = os.path.basename(chapter_01)[12:15].title()  # Gen, Exo, ...
+            # basename is, for example, eng-kjv_002_GEN_01_read.txt
+            full_book_name = read_file.readline()[1:].strip().strip(".").title()
+            # Strip unwanted initial Unicode character, etc.
+            book_abbrevs[book_abbr] = full_book_name
+
+    with open(r"BibleMetaData\book_abbreviations.json", "w") as write_file:
+        json.dump(book_abbrevs, write_file, indent=4)
+
+    return book_abbrevs
+
+
 def key_value(element):
+
+    # TODO: Use VSCode autoDocstring extension to quickly generate
+    #       docstring prototypes like the following, and complete them.
+    """[summary]
+
+    Arguments:
+        element {[type]} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
     sort_key = (element[0], element[1])
     return sort_key
 
 
 def desc_value_asc_key(element):
+
     sort_key = (-1 * element[1], element[0])
     return sort_key
 
 
 def build_frequency_lists(frequency):
+
     total_words = 0  # The final value of total_words is 790,663
     words_with_this_frequency = []
     frequency_lists = {}
@@ -65,6 +103,7 @@ def build_frequency_lists(frequency):
 
 
 def calc_word_freq(lines, word_frequency):
+
     # TODO (possibly): Generate some statistics like mean, median, and mode frequency
     # TODO (possibly): Generate alternative versions with and without italicized words
     frequency_this_chapter = {}
@@ -108,13 +147,11 @@ def write_word_frequency_files(word_frequency, word_frequency_lists_chapters):
         json.dump(word_frequency_lists_chapters, write_file, indent=4)
 
 
-def calc_verse_data(book_abbrevs, lines, chapter_file):
+def calc_verse_data(chapter_file, lines):
+
     book_number_name_chapter = os.path.basename(chapter_file)[9:-9]
     # basename is, for example, eng-kjv_002_GEN_01_read.txt
     book_abbr = book_number_name_chapter[3:6].title()  # Gen, Exo, ..., Rev
-    if book_abbr not in book_abbrevs:
-        full_book_name = lines[0][1:]  # Strip unwanted initial Unicode character
-        book_abbrevs[book_abbr] = full_book_name
     chapter_number = book_number_name_chapter[7:10].lstrip("0").rstrip("_")
     # Filenames normally contain 2-digit chapter numbers, but have 3 for Psalms
     # Remove leading '0's (as from '01' and '001') and trailing '_'s (as from '01_')
@@ -126,9 +163,16 @@ def calc_verse_data(book_abbrevs, lines, chapter_file):
 
 
 def main():
-    book_abbrevs = {}
+
+    book_nums = {}
+    book_abbrevs = calc_and_write_book_abbrevs()  # Calculate/write dict
+    for book_num, abbrev in enumerate(book_abbrevs.keys(), start=1):
+        book_nums[abbrev] = book_num
+    with open(r"BibleMetaData\book_numbers.json", "w") as write_file:
+        json.dump(book_nums, write_file, indent=4)
+
     verse_counts_by_chapter = {}  # dict of verse counts, indexed by chapter
-    # e.g., dict["Gen 1"]=31
+    #   e.g., verse_counts_by_chapter["Gen 1"]=31
     verse_counts_by_count = {}  # dict of full_refs, indexed by verse counts
     verse_counts_by_desc_count = {}  # above dict, sorted by decreasing verse count
     word_frequency = {}
@@ -146,7 +190,7 @@ def main():
         # There's no need to exclude the blank line at the end of chapter files,
         # since readlines() already seems to ignore it.
 
-        (full_ref, verse_count) = calc_verse_data(book_abbrevs, lines, chapter_file)
+        (full_ref, verse_count) = calc_verse_data(chapter_file, lines)
         verse_counts_by_chapter[full_ref] = verse_count
         if verse_count in verse_counts_by_count:
             verse_counts_by_count[verse_count].append(full_ref)
@@ -158,15 +202,6 @@ def main():
         word_frequency_lists_chapters[full_ref] = frequency_lists_this_chapter
 
     write_word_frequency_files(word_frequency, word_frequency_lists_chapters)
-
-    with open(r"BibleMetaData\book_abbreviations.json", "w") as write_file:
-        json.dump(book_abbrevs, write_file, indent=4)
-
-    book_nums = {}
-    for book_num, abbrev in enumerate(book_abbrevs.keys(), start=1):
-        book_nums[abbrev] = book_num
-    with open(r"BibleMetaData\book_numbers.json", "w") as write_file:
-        json.dump(book_nums, write_file, indent=4)
 
     with open(r"BibleMetaData\verse_counts_by_chapter.json", "w") as write_file:
         json.dump(verse_counts_by_chapter, write_file, indent=4)
