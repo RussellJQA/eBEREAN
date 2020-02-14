@@ -142,7 +142,7 @@ def build_frequency_lists(frequency):
     return frequency_lists
 
 
-def calc_word_freq(passage, word_frequency):
+def calc_word_freq(passage):
 
     # TODO (possibly): Generate some statistics like mean, median, and mode frequency
     # TODO (possibly): Generate alternative versions with and without italicized words
@@ -157,25 +157,31 @@ def calc_word_freq(passage, word_frequency):
                 #       if not ((len(word) >= 2) and (word == word.isupper()):
                 word = word.lower()
 
-            if word in word_frequency:
-                word_frequency[word] += 1
-            else:
-                word_frequency[word] = 1
             if word in frequency_this_passage:
                 frequency_this_passage[word] += 1
             else:
                 frequency_this_passage[word] = 1
 
-    return (word_frequency, frequency_this_passage)
+    return frequency_this_passage
 
 
-def write_word_frequency_files(word_frequency, frequency_lists_chapters):
+def calc_and_write_word_frequency_files(frequency_lists_chapters):
+
+    word_frequency = {}
+    for full_ref, frequency_list in frequency_lists_chapters.items():
+        for count, words in frequency_list.items():
+            if words != ["TOTAL WORDS"]:
+                for word in words:
+                    if word in word_frequency:
+                        word_frequency[word] += count
+                    else:
+                        word_frequency[word] = count
 
     # Write dict of KJV words, each paired (in a list) with its # of occurrences
     # {["a", 8282], ["aaron", 350], ["aaronites", 2], ... ["zuzims", 1]}
     word_frequency_sorted = {}
-    for key, value in sorted(word_frequency.items()):
-        word_frequency_sorted[key] = value
+    for word, count in sorted(word_frequency.items()):
+        word_frequency_sorted[word] = count
     with open(r"BibleMetaData\word_frequency.json", "w") as write_file:
         json.dump(word_frequency_sorted, write_file)
 
@@ -196,7 +202,6 @@ def main():
     #   e.g., verse_counts_by_chapter["Gen 1"]=31
 
     frequency_lists_chapters = {}
-    word_frequency = {}
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     source_files = os.path.join(script_dir, "downloads", "kjv_chapter_files")
@@ -212,14 +217,11 @@ def main():
         (full_ref, verse_count) = calc_verse_data(chapter_file, lines)
         verse_counts_by_chapter[full_ref] = verse_count
 
-        (word_frequency, freq_this_chapter) = calc_word_freq(lines[2:], word_frequency)
+        freq_this_chapter = calc_word_freq(lines[2:])
         frequency_lists_chapters[full_ref] = build_frequency_lists(freq_this_chapter)
 
     calc_and_write_verse_counts_by_desc_count(verse_counts_by_chapter)
-
-    # TODO: Rather than calculating main word_frequency dict as you go,
-    #       instead calculate it at the end by summing chapter word frequencies.
-    write_word_frequency_files(word_frequency, frequency_lists_chapters)
+    calc_and_write_word_frequency_files(frequency_lists_chapters)
 
 
 if __name__ == "__main__":
