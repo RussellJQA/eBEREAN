@@ -26,6 +26,17 @@ import re
 
 def calc_and_write_book_abbrevs():
 
+    # TODO: Use VSCode autoDocstring extension to quickly generate
+    #       docstring prototypes like the following, and complete them.
+    """[summary]
+
+    Arguments:
+        element {[type]} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
+
     script_dir = os.path.dirname(os.path.realpath(__file__))
     source_files = os.path.join(script_dir, "downloads", "kjv_chapter_files")
     kjv_chapter_01_files = glob.glob(os.path.join(source_files, "*_01_read.txt"))
@@ -49,20 +60,49 @@ def calc_and_write_book_abbrevs():
     return book_abbrevs
 
 
-def key_value(element):
+def calc_and_write_book_nums(book_abbrevs):
 
-    # TODO: Use VSCode autoDocstring extension to quickly generate
-    #       docstring prototypes like the following, and complete them.
-    """[summary]
+    book_nums = {}
+    for book_num, abbrev in enumerate(book_abbrevs.keys(), start=1):
+        book_nums[abbrev] = book_num
+    with open(r"BibleMetaData\book_numbers.json", "w") as write_file:
+        json.dump(book_nums, write_file, indent=4)
 
-    Arguments:
-        element {[type]} -- [description]
 
-    Returns:
-        [type] -- [description]
-    """
-    sort_key = (element[0], element[1])
-    return sort_key
+def calc_verse_data(chapter_file, lines):
+
+    book_number_name_chapter = os.path.basename(chapter_file)[9:-9]
+    # basename is, for example, eng-kjv_002_GEN_01_read.txt
+    book_abbr = book_number_name_chapter[3:6].title()  # Gen, Exo, ..., Rev
+    chapter_number = book_number_name_chapter[7:10].lstrip("0").rstrip("_")
+    # Filenames normally contain 2-digit chapter numbers, but have 3 for Psalms
+    # Remove leading '0's (as from '01' and '001') and trailing '_'s (as from '01_')
+
+    # Calculate verse counts
+    full_ref = book_abbr + " " + chapter_number
+    verse_count = len(lines) - 2  # Exclude lines[0] and lines [1]
+    return (full_ref, verse_count)
+
+
+def calc_and_write_verse_counts_by_desc_count(verse_counts_by_chapter):
+
+    with open(r"BibleMetaData\verse_counts_by_chapter.json", "w") as write_file:
+        json.dump(verse_counts_by_chapter, write_file, indent=4)
+
+    # Calculate verse_counts_by_count by summing from verse_counts_by_chapter
+    verse_counts_by_count = {}  # dict of full_refs, indexed by verse counts
+    for full_ref, verse_count in verse_counts_by_chapter.items():
+        if verse_count in verse_counts_by_count:
+            verse_counts_by_count[verse_count].append(full_ref)
+        else:
+            verse_counts_by_count[verse_count] = [full_ref]
+
+    verse_counts_by_desc_count = {}
+    #   verse_counts_by_count, sorted by decreasing verse count
+    for verse_count, full_refs in sorted(verse_counts_by_count.items(), reverse=True):
+        verse_counts_by_desc_count[verse_count] = full_refs
+    with open(r"BibleMetaData\verse_counts_by_desc_count.json", "w") as write_file:
+        json.dump(verse_counts_by_desc_count, write_file, indent=4)
 
 
 def desc_value_asc_key(element):
@@ -102,12 +142,12 @@ def build_frequency_lists(frequency):
     return frequency_lists
 
 
-def calc_word_freq(lines, word_frequency):
+def calc_word_freq(passage, word_frequency):
 
     # TODO (possibly): Generate some statistics like mean, median, and mode frequency
     # TODO (possibly): Generate alternative versions with and without italicized words
-    frequency_this_chapter = {}
-    for line in lines:
+    frequency_this_passage = {}
+    for line in passage:
         line = re.sub("[¶’]\S*", "", line).strip()
         # Eliminate paragraph markers, possessives, and leading/trailing blanks
         words = re.sub("[^a-z\- ]+", "", line, flags=re.IGNORECASE)
@@ -121,15 +161,15 @@ def calc_word_freq(lines, word_frequency):
                 word_frequency[word] += 1
             else:
                 word_frequency[word] = 1
-            if word in frequency_this_chapter:
-                frequency_this_chapter[word] += 1
+            if word in frequency_this_passage:
+                frequency_this_passage[word] += 1
             else:
-                frequency_this_chapter[word] = 1
+                frequency_this_passage[word] = 1
 
-    return (word_frequency, frequency_this_chapter)
+    return (word_frequency, frequency_this_passage)
 
 
-def write_word_frequency_files(word_frequency, word_frequency_lists_chapters):
+def write_word_frequency_files(word_frequency, frequency_lists_chapters):
 
     # Write dict of KJV words, each paired (in a list) with its # of occurrences
     # {["a", 8282], ["aaron", 350], ["aaronites", 2], ... ["zuzims", 1]}
@@ -144,40 +184,19 @@ def write_word_frequency_files(word_frequency, word_frequency_lists_chapters):
         json.dump(word_frequency_lists, write_file, indent=4)
 
     with open(r"BibleMetaData\word_frequency_lists_chapters.json", "w") as write_file:
-        json.dump(word_frequency_lists_chapters, write_file, indent=4)
-
-
-def calc_verse_data(chapter_file, lines):
-
-    book_number_name_chapter = os.path.basename(chapter_file)[9:-9]
-    # basename is, for example, eng-kjv_002_GEN_01_read.txt
-    book_abbr = book_number_name_chapter[3:6].title()  # Gen, Exo, ..., Rev
-    chapter_number = book_number_name_chapter[7:10].lstrip("0").rstrip("_")
-    # Filenames normally contain 2-digit chapter numbers, but have 3 for Psalms
-    # Remove leading '0's (as from '01' and '001') and trailing '_'s (as from '01_')
-
-    # Calculate verse counts
-    full_ref = book_abbr + " " + chapter_number
-    verse_count = len(lines) - 2  # Exclude lines[0] and lines [1]
-    return (full_ref, verse_count)
+        json.dump(frequency_lists_chapters, write_file, indent=4)
 
 
 def main():
 
-    book_nums = {}
     book_abbrevs = calc_and_write_book_abbrevs()  # Calculate/write dict
-    for book_num, abbrev in enumerate(book_abbrevs.keys(), start=1):
-        book_nums[abbrev] = book_num
-    with open(r"BibleMetaData\book_numbers.json", "w") as write_file:
-        json.dump(book_nums, write_file, indent=4)
+    calc_and_write_book_nums(book_abbrevs)
 
     verse_counts_by_chapter = {}  # dict of verse counts, indexed by chapter
     #   e.g., verse_counts_by_chapter["Gen 1"]=31
-    verse_counts_by_count = {}  # dict of full_refs, indexed by verse counts
-    verse_counts_by_desc_count = {}  # above dict, sorted by decreasing verse count
+
+    frequency_lists_chapters = {}
     word_frequency = {}
-    word_frequency_lists_chapters = {}
-    word_frequency_this_chapter = {}
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     source_files = os.path.join(script_dir, "downloads", "kjv_chapter_files")
@@ -192,24 +211,15 @@ def main():
 
         (full_ref, verse_count) = calc_verse_data(chapter_file, lines)
         verse_counts_by_chapter[full_ref] = verse_count
-        if verse_count in verse_counts_by_count:
-            verse_counts_by_count[verse_count].append(full_ref)
-        else:
-            verse_counts_by_count[verse_count] = [full_ref]
 
         (word_frequency, freq_this_chapter) = calc_word_freq(lines[2:], word_frequency)
-        frequency_lists_this_chapter = build_frequency_lists(freq_this_chapter)
-        word_frequency_lists_chapters[full_ref] = frequency_lists_this_chapter
+        frequency_lists_chapters[full_ref] = build_frequency_lists(freq_this_chapter)
 
-    write_word_frequency_files(word_frequency, word_frequency_lists_chapters)
+    calc_and_write_verse_counts_by_desc_count(verse_counts_by_chapter)
 
-    with open(r"BibleMetaData\verse_counts_by_chapter.json", "w") as write_file:
-        json.dump(verse_counts_by_chapter, write_file, indent=4)
-
-    for verse_count, full_refs in sorted(verse_counts_by_count.items(), reverse=True):
-        verse_counts_by_desc_count[verse_count] = full_refs
-    with open(r"BibleMetaData\verse_counts_by_desc_count.json", "w") as write_file:
-        json.dump(verse_counts_by_desc_count, write_file, indent=4)
+    # TODO: Rather than calculating main word_frequency dict as you go,
+    #       instead calculate it at the end by summing chapter word frequencies.
+    write_word_frequency_files(word_frequency, frequency_lists_chapters)
 
 
 if __name__ == "__main__":
