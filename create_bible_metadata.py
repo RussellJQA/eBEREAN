@@ -155,7 +155,7 @@ def calc_word_freq(passage):
             if word != "LORD":  # Differentiate between "lord"/"Lord" and "LORD"
                 # TODO: Possibly do something more generic, like:
                 #       if not ((len(word) >= 2) and (word == word.isupper()):
-                word = word.lower()
+                word = word.casefold()
 
             if word in frequency_this_passage:
                 frequency_this_passage[word] += 1

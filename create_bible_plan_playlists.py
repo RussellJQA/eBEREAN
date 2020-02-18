@@ -20,7 +20,7 @@ def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
     for (book_name, (book_abbrev, chapters)) in bible_books.items():
         book_num += 1  # "1 Thessalonians" => 52
         book_number_and_name = (
-            (str(book_num)).zfill(2) + "_" + (book_name.replace(" ", "-").lower())
+            (str(book_num)).zfill(2) + "_" + (book_name.replace(" ", "-").casefold())
         )
         # "1 Thessalonians" => "52_1-thessalonians"
         book_numbers_and_names[book_abbrev] = book_number_and_name
@@ -37,7 +37,7 @@ def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
             pattern = r"([1-3A-Z][a-z][a-z] )(\d{1,3})(-)(\d{1,3})"  # "Psa 1-2"
             match = re.search(pattern, full_ref)
             if match:
-                # Thist section properly handles readings with multiple chapters,
+                # This section properly handles readings with multiple chapters,
                 #   "Gen 1-2"     -> "01_gen_1" and "01_gen_2"
                 #   "Psa 1-2"     -> "19_psalm_1" and "19_psalm_2"
                 #   "Psa 52-54"   -> "19_psalm_52", 19_psalm_53", and "19_psalm_54"
