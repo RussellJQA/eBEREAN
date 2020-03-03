@@ -4,6 +4,8 @@ import json
 import os
 import re
 
+from lib.get_bible_metadata import get_verse_counts
+
 from create_bible_plan_playlists import create_bible_plan_playlists
 
 
@@ -72,27 +74,37 @@ def process_reading(
     def merge_2_refs(ref1, ref2):
 
         # Merge "Num 6" and (Num) "7:1-47" to "Num 6:1-7:47"   (3/2)
-        pattern1 = r"([1-3A-Z][a-z][a-z] \d{1,3})"  # Num 6
+        pattern1 = r"([1-3A-Z][a-z][a-z] \d{1,3})"
         match1 = re.search(pattern1, ref1)
-        pattern2 = r"(\d{1,3})(\:1\-)(\d{1,3})"  # (Num) 7:1-47
+        pattern2 = r"(\d{1,3})(\:1\-)(\d{1,3})"
         match2 = re.search(pattern2, ref2)
         if match1 and match2:
             return f"{match1.group(1)}:1-{match2.group(1)}:{match2.group(3)}"
+
         else:
-            return ref1 + "-" + ref2
+            # Merge "Num 7:48-89" and (Num) "8" to "Num 7:48-8:26"   (3/3)
+            pattern1 = r"([1-3A-Z][a-z][a-z] )(\d{1,3}\:\d{1,3})(\-)(\d{1,3})"
+            match1 = re.search(pattern1, ref1)
+            pattern2 = r"(\d{1,3})"
+            match2 = re.search(pattern2, ref2)
+            if match1 and match2:
+                book_with_space = match1.group(1)
+                ref1_chapter = match1.group(2)
+                ref2_chapter = match2.group()
+                verse_counts = get_verse_counts()  # TODO: Avoid calling multiple times
+                verses = verse_counts[f"{book_with_space}{ref2_chapter}"]
+                return f"{book_with_space}{ref1_chapter}-{ref2_chapter}:{verses}"
+
+            else:
+                return ref1 + "-" + ref2
 
         # TODO: Refactor above to properly merge other OT split chapter refs.
-        # For now, I just hand-tweak them in any output files
+        # For now, just hand-tweak them in any output files
 
-        # Step 1: Use additional regular expressions to match ref1/ref2 patterns.
-
-        # Pattern 1:
+        # Step 1: Use additional regular expressions to match the following patterns:
         #   1Ch 6:1-48, 6:49-81  => 1Ch 6:1-81 {better: just 1Ch 6}  {6/21}
         #   Ezr 2:1-36, 2:37-70  => Ezr 2:1-70 {better: just Ezr 2}  {7/22}
         #   Neh 7:1-38, 7:39-73  => Neh 7:1-73 {better: just Neh 7}  {7/30}
-
-        # Pattern 2:
-        #   Num 7:48-89, 8       => Num 7:48-89;8 {better: Num 7:48-8:26} (3/3)
 
         # Step 2: Further refactor to get the "better" representations,
         #   by looking up verse counts in verse_counts_by_chapter.json
