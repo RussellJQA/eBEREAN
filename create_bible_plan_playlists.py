@@ -84,17 +84,23 @@ def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
                     chapter_verse_ref,
                 ) = get_book_chapter_verse(full_ref)
 
-                pattern = r"([1-3A-Z][a-z][a-z] )(\d{1,3})(-)(\d{1,3})"  # "Psa 1-2"
-                match = re.search(pattern, full_ref)
-                if match:
-                    # Handle readings with multiple chapters in the same book:
-                    #   "Gen 1-2"     -> "01_gen_1" and "01_gen_2"
-                    #   "Psa 1-2"     -> "19_psalm_1" and "19_psalm_2"
-                    #   "Psa 52-54"   -> "19_psalm_52", 19_psalm_53", and "19_psalm_54"
-                    #   "Psa 123-125" -> "19_psalm_123", 19_psalm_124", and "19_psalm_125"
-                    initial_chapter = int(match.group(2))
-                    final_chapter = int(match.group(4))
-                    for chapter in range(initial_chapter, final_chapter + 1):
+                pattern1 = r"([1-3A-Z][a-z][a-z] )(\d{1,3})(-)(\d{1,3})"  # "Psa 1-2"
+                match1 = re.search(pattern1, full_ref)
+                # Handle readings with multiple chapters in the same book:
+                #   "Gen 1-2"     -> "01_gen_1" and "01_gen_2"
+                #   "Psa 1-2"     -> "19_psalm_1" and "19_psalm_2"
+                #   "Psa 52-54"   -> "19_psalm_52", 19_psalm_53", and "19_psalm_54"
+                #   "Psa 123-125" -> "19_psalm_123", 19_psalm_124", and "19_psalm_125"
+
+                pattern2 = (
+                    r"([1-3A-Z][a-z][a-z] )(\d{1,3})(\:\d{1,3}\-)(\d{1,3})(\:)(\d{1,3})"
+                )
+                match2 = re.search(pattern2, full_ref)
+
+                if match1 or match2:
+                    start_chapter = int(match1.group(2) if match1 else match2.group(2))
+                    end_chapter = int(match1.group(4) if match1 else match2.group(4))
+                    for chapter in range(start_chapter, end_chapter + 1):
                         chapter_ref = (str(chapter)).zfill(3 if book_num <= "39" else 2)
                         reading = book_number_and_name + "_" + chapter_ref
                         write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
