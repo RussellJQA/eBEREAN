@@ -90,13 +90,25 @@ def process_reading(
             if match1 and match2:
                 book_with_space = match1.group(1)
                 ref1_chapter = match1.group(2)
-                ref2_chapter = match2.group()
+                ref2_chapter = match2.group(1)
                 verse_counts = get_verse_counts()  # TODO: Avoid calling multiple times
                 verses = verse_counts[f"{book_with_space}{ref2_chapter}"]
                 return f"{book_with_space}{ref1_chapter}-{ref2_chapter}:{verses}"
 
             else:
-                return ref1 + "-" + ref2
+                pattern = r"([1-3A-Z][a-z][a-z] )(\d{1,3})(\:)(\d{1,3})(\-)(\d{1,3}) ([1-3A-Z][a-z][a-z] )(\d{1,3})(\:)(\d{1,3})(\-)(\d{1,3})"
+                match = re.search(pattern, f"{ref1} {ref2}")
+                if (
+                    match
+                    and (match.group(1) == match.group(6))
+                    and (match.group(2) == match.group(7))
+                ):
+                    book_with_space = match1.group(1)
+                    ref1_chapter = match1.group(2)
+                    ref2_chapter = match2.group(1)
+                    return ref1 + "-" + ref2
+                else:
+                    return ref1 + "-" + ref2
 
         # TODO: Refactor above to properly merge other OT split chapter refs.
         # For now, just hand-tweak them in any output files
