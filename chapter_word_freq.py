@@ -70,6 +70,18 @@ def main():
             chapter = key[4:].zfill(3)  # 0-pad for consistent cross-platform sorting
             csv_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.csv")
 
+            # TODO: In addition to .csv files, generate .html files with sortable
+            #       tables, based on:
+            #       https://www.kryogenix.org/code/browser/sorttable/sorttable.js
+            #       See Gen 001 word_freq.html in my Python Playground > Bible folder.
+
+            # TODO: Have 2 different relative frequency columns:
+            #       1. Calculated from numInChap and numInKjv only
+            #       2. Also take into account the total number of words in the chapter
+            #           A word which is 1 time in a chapter of 100 words
+            #           should have a greater relative frequency than a word
+            #           which is 1 time in a chapter of 200 words.
+
             with open(csv_fn, mode="w", newline="") as csv_file:
                 # newline="" prevents blank lines from being added between rows
                 writer = csv.writer(csv_file, delimiter=",", quotechar='"')
@@ -115,4 +127,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
