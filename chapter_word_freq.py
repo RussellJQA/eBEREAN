@@ -68,7 +68,95 @@ def handle_book_folder(
     return book_folder
 
 
-def main():
+def get_chapter_word_freqs(
+    words_in_bible, words_in_chapter, word_frequencies, word_frequency
+):
+
+    chapter_word_freqs = {}
+    for (chapter_frequency, words) in word_frequencies.items():
+        if words != ["TOTAL WORDS"]:
+            times_in_chapter = int(chapter_frequency)
+            for word in words:
+                times_in_bible = word_frequency[word]
+
+                # TODO: Add this to .csv files
+                ## Most natural way of stating algorithm
+                # simple_relative_frequency = times_in_chapter / (
+                #     times_in_bible / words_in_bible
+                # )
+                simple_relative_frequency = (
+                    times_in_chapter * words_in_bible
+                ) / times_in_bible
+
+                ## Most natural way of stating algorithm
+                # weighted_relative_frequency = (times_in_chapter / words_in_chapter) / (
+                #     times_in_bible / words_in_bible
+                # )
+                # weighted_relative_frequency = (
+                #     simple_relative_frequency / words_in_chapter
+                # )
+
+                values = [
+                    int(chapter_frequency),
+                    times_in_bible,
+                    simple_relative_frequency / words_in_chapter,
+                    simple_relative_frequency,
+                ]
+                chapter_word_freqs[word] = values
+
+    return chapter_word_freqs
+
+
+def get_relative_word_frequency(
+    words_in_bible, words_in_chapter, word_frequencies, word_frequency
+):
+
+    relative_word_frequency = {}
+    relative_word_frequency["TOTAL WORDS"] = [words_in_chapter]
+    chapter_word_freqs = get_chapter_word_freqs(
+        words_in_bible, words_in_chapter, word_frequencies, word_frequency
+    )
+    for chapter_word_freq, values in sorted(
+        chapter_word_freqs.items(), key=desc_value2_asc_key
+    ):
+        relative_word_frequency[chapter_word_freq] = values
+
+    return relative_word_frequency
+
+
+def write_csv_file(
+    words_in_bible, key, book_abbrev, book_folder, relative_word_frequency
+):
+
+    book_abbrev = key[0:3]
+    chapter = key[4:].zfill(3)  # 0-pad for consistent cross-platform sorting
+    csv_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.csv")
+
+    with open(csv_fn, mode="w", newline="") as csv_file:
+        # newline="" prevents blank lines from being added between rows
+        writer = csv.writer(csv_file, delimiter=",", quotechar='"')
+        writer.writerow(
+            ["word", "numInChap", "numInKjv", "weightedRelFreq", "simpleRelFreq",]
+        )
+        #   Column header row
+
+        for count, chapter_word_freq in enumerate(relative_word_frequency):
+            values = relative_word_frequency[chapter_word_freq]
+            if count:  # Data row
+                writer.writerow(
+                    [chapter_word_freq, values[0], values[1], values[2], values[3],]
+                )
+            else:  # Totals row
+                writer.writerow(
+                    [
+                        f"TOTAL ({key})",
+                        relative_word_frequency[chapter_word_freq][0],
+                        words_in_bible,
+                    ]
+                )
+
+
+def generate_word_freq_files():
 
     # TODO:
     # Refactor using a function which instead of calculating word frequencies in a chapter
@@ -91,12 +179,6 @@ def main():
     with open(read_fn, "r") as read_file:
         word_frequency_lists_chapters = json.load(read_file)
         for (key, word_frequencies) in word_frequency_lists_chapters.items():
-            book_abbrev = key[0:3]
-            book_folder = handle_book_folder(
-                chapter_words_folder, book_folder, previous_book_abbrev, book_abbrev
-            )
-            chapter = key[4:].zfill(3)  # 0-pad for consistent cross-platform sorting
-            csv_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.csv")
 
             # TODO: In addition to .csv files, generate .html files with sortable
             #       tables, based on 1 or more of the following:
@@ -110,73 +192,29 @@ def main():
             #       https://github.com/stefanhoelzl/vue.py/blob/master/examples/grid_component/app.py
             #   5. https://anvil.works/docs/data-tables/data-tables-in-code#searching-querying-a-table
 
-            with open(csv_fn, mode="w", newline="") as csv_file:
-                # newline="" prevents blank lines from being added between rows
+            words_in_chapter = int(next(iter(word_frequencies)))
+            relative_word_frequency = get_relative_word_frequency(
+                words_in_bible, words_in_chapter, word_frequencies, word_frequency
+            )
+            chapters_relative_word_frequency[key] = relative_word_frequency
 
-                writer = csv.writer(csv_file, delimiter=",", quotechar='"')
-                writer.writerow(
-                    [
-                        "word",
-                        "numInChap",
-                        "numInKjv",
-                        "weightedRelFreq",
-                        "simpleRelFreq",
-                    ]
-                )
-                #   Column header row
-                words_in_chapter = int(next(iter(word_frequencies)))
-                writer.writerow([f"TOTAL ({key})", words_in_chapter, words_in_bible])
-                #   Totals row
-
-                chapter_word_freqs = {}
-                for (chapter_frequency, words) in word_frequencies.items():
-                    if words != ["TOTAL WORDS"]:
-                        times_in_chapter = int(chapter_frequency)
-                        for word in words:
-                            times_in_bible = word_frequency[word]
-
-                            # TODO: Add this to .csv files
-                            ## Most natural way of stating algorithm
-                            # simple_relative_frequency = times_in_chapter / (
-                            #     times_in_bible / words_in_bible
-                            # )
-                            simple_relative_frequency = (
-                                times_in_chapter * words_in_bible
-                            ) / times_in_bible
-
-                            ## Most natural way of stating algorithm
-                            # weighted_relative_frequency = (times_in_chapter / words_in_chapter) / (
-                            #     times_in_bible / words_in_bible
-                            # )
-                            # weighted_relative_frequency = (
-                            #     simple_relative_frequency / words_in_chapter
-                            # )
-
-                            values = [
-                                int(chapter_frequency),
-                                times_in_bible,
-                                simple_relative_frequency / words_in_chapter,
-                                simple_relative_frequency,
-                            ]
-                            chapter_word_freqs[word] = values
-
-                relative_word_frequency = {}
-                relative_word_frequency["TOTAL WORDS"] = [words_in_chapter]
-                for chapter_word_freq, values in sorted(
-                    chapter_word_freqs.items(), key=desc_value2_asc_key
-                ):
-                    relative_word_frequency[chapter_word_freq] = values
-                    writer.writerow(
-                        [chapter_word_freq, values[0], values[1], values[2], values[3]]
-                    )
-                chapters_relative_word_frequency[key] = relative_word_frequency
-
+            book_abbrev = key[0:3]
+            book_folder = handle_book_folder(
+                chapter_words_folder, book_folder, previous_book_abbrev, book_abbrev
+            )
+            write_csv_file(
+                words_in_bible, key, book_abbrev, book_folder, relative_word_frequency
+            )
             previous_book_abbrev = book_abbrev
 
     with open(
         r"BibleMetaData\chapters_relative_word_frequency.json", "w"
     ) as write_file:
         json.dump(chapters_relative_word_frequency, write_file, indent=4)
+
+
+def main():
+    generate_word_freq_files()
 
 
 if __name__ == "__main__":
