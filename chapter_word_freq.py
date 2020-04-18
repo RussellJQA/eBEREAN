@@ -98,9 +98,6 @@ def main():
             chapter = key[4:].zfill(3)  # 0-pad for consistent cross-platform sorting
             csv_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.csv")
 
-            words_in_chapter = int(next(iter(word_frequencies)))
-            chapter_words = {}
-
             # TODO: In addition to .csv files, generate .html files with sortable
             #       tables, based on 1 or more of the following:
             #  *1. https://www.kryogenix.org/code/browser/sorttable/sorttable.js
@@ -115,6 +112,7 @@ def main():
 
             with open(csv_fn, mode="w", newline="") as csv_file:
                 # newline="" prevents blank lines from being added between rows
+
                 writer = csv.writer(csv_file, delimiter=",", quotechar='"')
                 writer.writerow(
                     [
@@ -126,8 +124,11 @@ def main():
                     ]
                 )
                 #   Column header row
+                words_in_chapter = int(next(iter(word_frequencies)))
                 writer.writerow([f"TOTAL ({key})", words_in_chapter, words_in_bible])
                 #   Totals row
+
+                chapter_word_freqs = {}
                 for (chapter_frequency, words) in word_frequencies.items():
                     if words != ["TOTAL WORDS"]:
                         times_in_chapter = int(chapter_frequency)
@@ -157,15 +158,16 @@ def main():
                                 simple_relative_frequency / words_in_chapter,
                                 simple_relative_frequency,
                             ]
-                            chapter_words[word] = values
+                            chapter_word_freqs[word] = values
+
                 relative_word_frequency = {}
                 relative_word_frequency["TOTAL WORDS"] = [words_in_chapter]
-                for chapter_word, values in sorted(
-                    chapter_words.items(), key=desc_value2_asc_key
+                for chapter_word_freq, values in sorted(
+                    chapter_word_freqs.items(), key=desc_value2_asc_key
                 ):
-                    relative_word_frequency[chapter_word] = values
+                    relative_word_frequency[chapter_word_freq] = values
                     writer.writerow(
-                        [chapter_word, values[0], values[1], values[2], values[3]]
+                        [chapter_word_freq, values[0], values[1], values[2], values[3]]
                     )
                 chapters_relative_word_frequency[key] = relative_word_frequency
 
