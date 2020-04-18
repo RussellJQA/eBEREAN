@@ -13,6 +13,7 @@ bible_metadata_folder = os.path.join(os.getcwd(), "BibleMetaData")
 
 
 def print_word_info(word, values):
+
     (chap_freq, word_freq, rel_freq) = values
     print(f"{word}: chapter: {chap_freq}, Bible: {word_freq}, relative: {rel_freq}")
     # chapter: How many times this word is in the chapter
@@ -22,9 +23,16 @@ def print_word_info(word, values):
 
 
 def desc_value2_asc_key(element):
-    sort_key = (-1 * element[1][2], -1 * element[1][0], element[0])
+
     """
-    Below, see the sort_key calculation for 2 rows of file "exo 030 word_freq.csv":
+    The simple relative frequency of both "composition" and "atonements" in Exodus 30 is 815.1164948453609, because:
+        2 out of 2 of the Bible's occurrences of "composition" are in this chapter
+        1 out of 1 of the Bible's occurrences of "atonements" are in this chapter
+    Of those, weight "composition" more highly (by giving it a more negative) sort key, so that it will be listed
+    earlier in the .csv file.
+
+    The sort_key calculations for the 2 corresponding rows of file "Exo 030 word_freq_bible.csv" are:
+
         composition,2,2,815.1164948453609
             element == ["composition", [1,1,815.1164948453609]]
             -1 * element[1][2] == -815.1164948453609
@@ -38,6 +46,9 @@ def desc_value2_asc_key(element):
             element[0] == "atonements"
             sort_key == (-815.1164948453609, -1, "atonements")
     """
+
+    sort_key = (-1 * element[1][2], -1 * element[1][0], element[0])
+
     return sort_key
 
 
@@ -71,13 +82,20 @@ def main():
             csv_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.csv")
 
             # TODO: In addition to .csv files, generate .html files with sortable
-            #       tables, based on:
-            #       https://www.kryogenix.org/code/browser/sorttable/sorttable.js
-            #       See Gen 001 word_freq.html in my Python Playground > Bible folder.
+            #       tables, based on 1 or more of the following:
+            #  *1. https://www.kryogenix.org/code/browser/sorttable/sorttable.js
+            #       See Gen 001 word_freq_bible.html in my Python Playground > Bible folder.
+            #   2. https://www.w3schools.com/howto/howto_js_sort_table.asp
+            # **3. https://brython.info/gallery/sort_table.html
+            # ***4. https://brython.info/gallery/sort_table_template.html
+            #   5. https://stefanhoelzl.github.io/vue.py/examples/grid_component/
+            #       source at
+            #       https://github.com/stefanhoelzl/vue.py/blob/master/examples/grid_component/app.py
+            #   5. https://anvil.works/docs/data-tables/data-tables-in-code#searching-querying-a-table
 
             # TODO: Have 2 different relative frequency columns:
-            #       1. Calculated from numInChap and numInKjv only
-            #       2. Also take into account the total number of words in the chapter
+            #       1. simple relative frequency: Calculated from numInChap and numInKjv only
+            #       2. weighted relative frequency: Take into account the total number of words in the chapter
             #           A word which is 1 time in a chapter of 100 words
             #           should have a greater relative frequency than a word
             #           which is 1 time in a chapter of 200 words.

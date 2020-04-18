@@ -1,8 +1,3 @@
-# Chapter files extracted from https://ebible.org/Scriptures/eng-kjv_readaloud.zip
-# (linked to at https://ebible.org/kjv/)
-
-# Above link and the following copyright information are from:
-#   https://ebible.org/find/show.php?id=eng-kjv
 """
 
 King James Version + Apocrypha
@@ -11,12 +6,23 @@ Public Domain
 Language: English
 Dialect: archaic British
 
-Letters patent issued by King James with no expiration date means that to print this translation in the United Kingdom or import printed copies into the UK, you need permission. Currently, the Cambridge University Press, the Oxford University Press, and Collins have the exclusive right to print this Bible translation in the UK. This royal decree has no effect outside of the UK, where this work is firmly in the Public Domain. Please see http://www.cambridge.org/about-us/who-we-are/queens-printers-patent and https://en.wikipedia.org/wiki/King_James_Version#Copyright_status for more information. This free text of the King James Version of the Holy Bible is brought to you courtesy of the Crosswire Bible Society and eBible.org.
+Letters patent issued by King James with no expiration date means that to print this translation in the United Kingdom or import printed copies into the UK,
+you need permission.
+Currently, the Cambridge University Press, the Oxford University Press, and Collins have the exclusive right to print this Bible
+translation in the UK. This royal decree has no effect outside of the UK, where this work is firmly in the Public Domain.
+Please see http://www.cambridge.org/about-us/who-we-are/queens-printers-patent and https://en.wikipedia.org/wiki/King_James_Version#Copyright_status
+for more information.
+This free text of the King James Version of the Holy Bible is brought to you courtesy of the Crosswire Bible Society and eBible.org.
 
 
 2018-08-27
 
 """
+# Chapter files extracted from https://ebible.org/Scriptures/eng-kjv_readaloud.zip
+# (linked to at https://ebible.org/kjv/)
+
+# Above link and the following copyright information are from:
+#   https://ebible.org/find/show.php?id=eng-kjv
 
 import glob
 import json
@@ -148,9 +154,9 @@ def calc_word_freq(passage):
     # TODO (possibly): Generate alternative versions with and without italicized words
     frequency_this_passage = {}
     for line in passage:
-        line = re.sub("[¶’]\S*", "", line).strip()
+        line = re.sub(r"[¶’]\S*", "", line).strip()
         # Eliminate paragraph markers, possessives, and leading/trailing blanks
-        words = re.sub("[^a-z\- ]+", "", line, flags=re.IGNORECASE)
+        words = re.sub(r"[^a-z\- ]+", "", line, flags=re.IGNORECASE)
         for word in words.split():
             if word != "LORD":  # Differentiate between "lord"/"Lord" and "LORD"
                 # TODO: Possibly do something more generic, like:
@@ -168,7 +174,7 @@ def calc_word_freq(passage):
 def calc_and_write_word_frequency_files(frequency_lists_chapters):
 
     word_frequency = {}
-    for full_ref, frequency_list in frequency_lists_chapters.items():
+    for (_, frequency_list) in frequency_lists_chapters.items():
         for count, words in frequency_list.items():
             if words != ["TOTAL WORDS"]:
                 for word in words:
