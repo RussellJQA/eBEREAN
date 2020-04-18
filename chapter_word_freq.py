@@ -68,7 +68,46 @@ def handle_book_folder(
     return book_folder
 
 
-def main():
+def get_chapter_word_freqs(
+    words_in_bible, words_in_chapter, word_frequencies, word_frequency
+):
+
+    chapter_word_freqs = {}
+    for (chapter_frequency, words) in word_frequencies.items():
+        if words != ["TOTAL WORDS"]:
+            times_in_chapter = int(chapter_frequency)
+            for word in words:
+                times_in_bible = word_frequency[word]
+
+                # TODO: Add this to .csv files
+                ## Most natural way of stating algorithm
+                # simple_relative_frequency = times_in_chapter / (
+                #     times_in_bible / words_in_bible
+                # )
+                simple_relative_frequency = (
+                    times_in_chapter * words_in_bible
+                ) / times_in_bible
+
+                ## Most natural way of stating algorithm
+                # weighted_relative_frequency = (times_in_chapter / words_in_chapter) / (
+                #     times_in_bible / words_in_bible
+                # )
+                # weighted_relative_frequency = (
+                #     simple_relative_frequency / words_in_chapter
+                # )
+
+                values = [
+                    int(chapter_frequency),
+                    times_in_bible,
+                    simple_relative_frequency / words_in_chapter,
+                    simple_relative_frequency,
+                ]
+                chapter_word_freqs[word] = values
+
+    return chapter_word_freqs
+
+
+def generate_word_freq_files():
 
     # TODO:
     # Refactor using a function which instead of calculating word frequencies in a chapter
@@ -128,40 +167,14 @@ def main():
                 writer.writerow([f"TOTAL ({key})", words_in_chapter, words_in_bible])
                 #   Totals row
 
-                chapter_word_freqs = {}
-                for (chapter_frequency, words) in word_frequencies.items():
-                    if words != ["TOTAL WORDS"]:
-                        times_in_chapter = int(chapter_frequency)
-                        for word in words:
-                            times_in_bible = word_frequency[word]
-
-                            # TODO: Add this to .csv files
-                            ## Most natural way of stating algorithm
-                            # simple_relative_frequency = times_in_chapter / (
-                            #     times_in_bible / words_in_bible
-                            # )
-                            simple_relative_frequency = (
-                                times_in_chapter * words_in_bible
-                            ) / times_in_bible
-
-                            ## Most natural way of stating algorithm
-                            # weighted_relative_frequency = (times_in_chapter / words_in_chapter) / (
-                            #     times_in_bible / words_in_bible
-                            # )
-                            # weighted_relative_frequency = (
-                            #     simple_relative_frequency / words_in_chapter
-                            # )
-
-                            values = [
-                                int(chapter_frequency),
-                                times_in_bible,
-                                simple_relative_frequency / words_in_chapter,
-                                simple_relative_frequency,
-                            ]
-                            chapter_word_freqs[word] = values
+                # TODO: Separate concerns of getting relative_word_frequency (do before with statement)
+                #       and writer.writerow() calls
 
                 relative_word_frequency = {}
                 relative_word_frequency["TOTAL WORDS"] = [words_in_chapter]
+                chapter_word_freqs = get_chapter_word_freqs(
+                    words_in_bible, words_in_chapter, word_frequencies, word_frequency
+                )
                 for chapter_word_freq, values in sorted(
                     chapter_word_freqs.items(), key=desc_value2_asc_key
                 ):
@@ -177,6 +190,10 @@ def main():
         r"BibleMetaData\chapters_relative_word_frequency.json", "w"
     ) as write_file:
         json.dump(chapters_relative_word_frequency, write_file, indent=4)
+
+
+def main():
+    generate_word_freq_files()
 
 
 if __name__ == "__main__":
