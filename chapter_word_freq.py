@@ -9,6 +9,8 @@ import os
 
 from lib.get_bible_metadata import get_word_frequency, get_book_nums
 
+from chapter_word_freq_html import write_html_file
+
 bible_metadata_folder = os.path.join(os.getcwd(), "BibleMetaData")
 
 
@@ -124,13 +126,7 @@ def get_relative_word_frequency(
     return relative_word_frequency
 
 
-def write_csv_file(
-    words_in_bible, key, book_abbrev, book_folder, relative_word_frequency
-):
-
-    book_abbrev = key[0:3]
-    chapter = key[4:].zfill(3)  # 0-pad for consistent cross-platform sorting
-    csv_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.csv")
+def write_csv_file(words_in_bible, key, csv_fn, relative_word_frequency):
 
     with open(csv_fn, mode="w", newline="") as csv_file:
         # newline="" prevents blank lines from being added between rows
@@ -154,6 +150,32 @@ def write_csv_file(
                         words_in_bible,
                     ]
                 )
+
+
+def write_csv_and_html(
+    words_in_bible, key, book_abbrev, book_folder, relative_word_frequency
+):
+
+    book_abbrev = key[0:3]
+    chapter = key[4:].zfill(3)  # 0-pad for consistent cross-platform sorting
+
+    csv_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.csv")
+    write_csv_file(words_in_bible, key, csv_fn, relative_word_frequency)
+
+    # In addition to the above .csv file, generate an .html file with sortable tables
+    # Currently, that's done with method #1 below, but we may want to look at some of
+    # other alternatives:
+    #  *1. https://www.kryogenix.org/code/browser/sorttable/sorttable.js
+    #   2. https://www.w3schools.com/howto/howto_js_sort_table.asp
+    # **3. https://brython.info/gallery/sort_table.html
+    # ***4. https://brython.info/gallery/sort_table_template.html
+    #   5. https://stefanhoelzl.github.io/vue.py/examples/grid_component/
+    #       source at
+    #       https://github.com/stefanhoelzl/vue.py/blob/master/examples/grid_component/app.py
+    #   6. https://anvil.works/docs/data-tables/data-tables-in-code#searching-querying-a-table
+
+    html_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.html")
+    write_html_file(words_in_bible, key, html_fn, relative_word_frequency)
 
 
 def generate_word_freq_files():
@@ -180,18 +202,6 @@ def generate_word_freq_files():
         word_frequency_lists_chapters = json.load(read_file)
         for (key, word_frequencies) in word_frequency_lists_chapters.items():
 
-            # TODO: In addition to .csv files, generate .html files with sortable
-            #       tables, based on 1 or more of the following:
-            #  *1. https://www.kryogenix.org/code/browser/sorttable/sorttable.js
-            #       See Gen 001 word_freq_bible.html in my Python Playground > Bible folder.
-            #   2. https://www.w3schools.com/howto/howto_js_sort_table.asp
-            # **3. https://brython.info/gallery/sort_table.html
-            # ***4. https://brython.info/gallery/sort_table_template.html
-            #   5. https://stefanhoelzl.github.io/vue.py/examples/grid_component/
-            #       source at
-            #       https://github.com/stefanhoelzl/vue.py/blob/master/examples/grid_component/app.py
-            #   5. https://anvil.works/docs/data-tables/data-tables-in-code#searching-querying-a-table
-
             words_in_chapter = int(next(iter(word_frequencies)))
             relative_word_frequency = get_relative_word_frequency(
                 words_in_bible, words_in_chapter, word_frequencies, word_frequency
@@ -202,7 +212,7 @@ def generate_word_freq_files():
             book_folder = handle_book_folder(
                 chapter_words_folder, book_folder, previous_book_abbrev, book_abbrev
             )
-            write_csv_file(
+            write_csv_and_html(
                 words_in_bible, key, book_abbrev, book_folder, relative_word_frequency
             )
             previous_book_abbrev = book_abbrev
