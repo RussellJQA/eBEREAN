@@ -1,3 +1,5 @@
+import string
+
 BEGINNING = """<!DOCTYPE html>
 <html lang="en">
 
@@ -52,17 +54,17 @@ ENDING = """        </tbody>
 </html>
 """
 
-
-def write_table_row(
-    write_file, word, numInChap, numInKjv, weightedRelFreq, simpleRelFreq
-):
-    write_file.write("            <tr>")
-    write_file.write(f"                <td>{word}</td>")
-    write_file.write(f"                <td align='right'>{numInChap}</td>")
-    write_file.write(f"                <td align='right'>{numInKjv}</td>")
-    write_file.write(f"                <td>{weightedRelFreq}</td>")
-    write_file.write(f"                <td>{simpleRelFreq}</td>")
-    write_file.write("            </tr>")
+table_row = string.Template(
+    """
+            <tr>
+                <td>$word</td>
+                <td align='right'>$numInChap</td>
+                <td align='right'>$numInKjv</td>
+                <td>$weightedRelFreq</td>
+                <td>$simpleRelFreq</td>
+            </tr>
+"""
+)
 
 
 def write_html_file(words_in_bible, key, html_fn, relative_word_frequency):
@@ -78,14 +80,14 @@ def write_html_file(words_in_bible, key, html_fn, relative_word_frequency):
         for count, chapter_word_freq in enumerate(relative_word_frequency):
             values = relative_word_frequency[chapter_word_freq]
             if count:  # Data row
-                write_table_row(
-                    write_file,
-                    chapter_word_freq,
-                    values[0],
-                    values[1],
-                    values[2],
-                    values[3],
-                )
+                values = {
+                    "word": chapter_word_freq,
+                    "numInChap": values[0],
+                    "numInKjv": values[1],
+                    "weightedRelFreq": values[2],
+                    "simpleRelFreq": values[3],
+                }
+                write_file.write(table_row.substitute(values))
 
         write_file.write(ENDING)
 
