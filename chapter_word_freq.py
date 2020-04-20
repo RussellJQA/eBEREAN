@@ -5,6 +5,7 @@ compared to its frequency in the entire Bible
 
 import csv
 import json
+import math
 import os
 
 from lib.get_bible_metadata import get_word_frequency, get_book_nums
@@ -12,6 +13,53 @@ from lib.get_bible_metadata import get_word_frequency, get_book_nums
 from chapter_word_freq_html import write_html_file
 
 bible_metadata_folder = os.path.join(os.getcwd(), "BibleMetaData")
+
+
+# Slightly modified from:
+# https://code.activestate.com/recipes/578114-round-number-to-specified-number-of-significant-di/
+# Created by Ben Hoyt on Thu, 26 Apr 2012 (MIT-licensed)
+def round_sigfigs(num, sig_figs):
+    """Round to specified number of sigfigs.
+
+    >>> round_sigfigs(0, sig_figs=4)
+    0
+    >>> int(round_sigfigs(12345, sig_figs=2))
+    12000
+    >>> int(round_sigfigs(-12345, sig_figs=2))
+    -12000
+    >>> int(round_sigfigs(1, sig_figs=2))
+    1
+    >>> '{0:.3}'.format(round_sigfigs(3.1415, sig_figs=2))
+    '3.1'
+    >>> '{0:.3}'.format(round_sigfigs(-3.1415, sig_figs=2))
+    '-3.1'
+    >>> '{0:.5}'.format(round_sigfigs(0.00098765, sig_figs=2))
+    '0.00099'
+    >>> '{0:.6}'.format(round_sigfigs(0.00098765, sig_figs=3))
+    '0.000988'
+    """
+    if num != 0:
+        return round(num, -int(math.floor(math.log10(abs(num))) - (sig_figs - 1)))
+    # else:
+    #     return 0  # Can't take the log of 0
+    return 0  # Can't take the log of 0
+
+
+def round_4_to_6_sigfigs(num):
+    """ If there are more than 4 sigfigs to the left of the decimal point:
+            Round to the number of sigfits to the left of the decimal point
+        Else:
+            Round to 4 sigfigs
+    NOTE: For words_in_bible = 790663,
+          we only need to allow for up to 6 sigfigs to the left of the decimal point
+    """
+    if num >= (10 ** 5):
+        return int(round_sigfigs(num, 6))
+    if num >= (10 ** 4):
+        return int(round_sigfigs(num, 5))
+    if num >= (10 ** 3):
+        return int(round_sigfigs(num, 4))
+    return round_sigfigs(num, 4)
 
 
 def print_word_info(word, values):
@@ -81,7 +129,6 @@ def get_chapter_word_freqs(
             for word in words:
                 times_in_bible = word_frequency[word]
 
-                # TODO: Add this to .csv files
                 ## Most natural way of stating algorithm
                 # simple_relative_frequency = times_in_chapter / (
                 #     times_in_bible / words_in_bible
@@ -89,6 +136,8 @@ def get_chapter_word_freqs(
                 simple_relative_frequency = (
                     times_in_chapter * words_in_bible
                 ) / times_in_bible
+                # Now, (in addition to weighted_relative_frequency), this, too, is
+                # included in both .csv files and .html files.
 
                 ## Most natural way of stating algorithm
                 # weighted_relative_frequency = (times_in_chapter / words_in_chapter) / (
@@ -101,8 +150,9 @@ def get_chapter_word_freqs(
                 values = [
                     int(chapter_frequency),
                     times_in_bible,
-                    simple_relative_frequency / words_in_chapter,
-                    simple_relative_frequency,
+                    round_4_to_6_sigfigs(simple_relative_frequency / words_in_chapter),
+                    #   This is weighted_relative_frequency (rounded)
+                    round_4_to_6_sigfigs(simple_relative_frequency),
                 ]
                 chapter_word_freqs[word] = values
 
