@@ -1,13 +1,7 @@
 import string
 
-# TODO: Add an index page
-
-BODY_ENDING = """
-    </main>
-    <footer class='page' role='contentinfo'><p>Copyright &copy; 2020 by Russell Johnson</p></footer>
-</body>
-
-"""
+# TODO: Add a master index page
+# TODO: Add favicon
 
 head = string.Template(
     """
@@ -44,17 +38,19 @@ head = string.Template(
             text-align: center
         }
     </style>
-</head>"""
+</head>
+"""
 )
 
-# TODO: Add favicon
-
-body_start = string.Template(
+header = string.Template(
     """
-<body>
     <header class='page' role='banner'>
         <h1>$h1</h1>
-    </header>
+    </header>"""
+)
+
+main_start = string.Template(
+    """
     <main id='main_content'  class='page' class='page' role='main' tabindex='-1'>
         <h2>$h2</h2>
         
@@ -67,7 +63,7 @@ body_start = string.Template(
                 <li>Weighted:	The weighted relative frequency of that word in this chapter of the KJV</li>
                 <li>Simple:		The simple relative frequency of that word in this chapter of the KJV</li>
             </ul>
-            (See TBD for an explanation of both types of relative frequency.)
+            (See TBD for further explanation of both types of relative frequency.)
         </p>
 
 """
@@ -107,52 +103,61 @@ table_row = string.Template(
 
 table_end = """
             </tbody>
-        </table>"""
+        </table>
+"""
+
+footer = """
+    <footer class='page' role='contentinfo'><p>Copyright &copy; 2020 by Russell Johnson</p></footer>
+"""
 
 
-def write_html_file(words_in_bible, key, html_fn, relative_word_frequency):
+def get_main_tag(words_in_bible, key, relative_word_frequency):
+
+    main_tag = ""
+
+    words_in_chapter = "{:,}".format(relative_word_frequency["TOTAL WORDS"][0])
+    words_in_bible_formatted = "{:,}".format(words_in_bible)
+    #   Include thousands separators
+    values = {
+        "h2": f"{words_in_chapter} word occurrences in {key} in the KJV ({words_in_bible_formatted} word occurrences in the entire KJV):",
+    }
+    main_tag += main_start.substitute(values)
+
+    main_tag += table_start
+    for count, chapter_word_freq_key in enumerate(relative_word_frequency):
+        if count:  # Table row data
+            values = relative_word_frequency[chapter_word_freq_key]
+            # Include thousands separators, where needed
+            table_row_values = {
+                "word": chapter_word_freq_key,
+                "numInChap": values[0],
+                "numInKjv": ("{:,}".format(values[1])),
+                "weightedRelFreq": values[2],
+                "simpleRelFreq": ("{:,}".format(values[3])),
+            }
+            main_tag += table_row.substitute(table_row_values)
+    main_tag += table_end
+
+    main_tag += "    </main>"  # Closing <main> tag
+
+    return main_tag
+
+
+def write_html_file(html_fn, title_h1, main_tag):
 
     with open(html_fn, "w") as write_file:
 
         write_file.write("<!doctype html>")
         write_file.write("<html lang='en'>")
 
-        # Write <head> tag
+        write_file.write(head.substitute({"title": title_h1}))  # Write <head> tag
 
-        values = {
-            "title": f"{key}: KJV Chapter Word Frequencies",
-        }
-        write_file.write(head.substitute(values))
+        write_file.write("<body>")  # Write start of <body> tag
+        write_file.write(header.substitute({"h1": title_h1}))
+        write_file.write(main_tag)  #   Write <main> tag
+        write_file.write(footer)
+        write_file.write("</body>\n\n")  # Write end of <body> tag
 
-        # Write <body> tag
-
-        for count, chapter_word_freq in enumerate(relative_word_frequency):
-            values = relative_word_frequency[chapter_word_freq]
-            if count:  # Table row data
-                # Include thousands separators, where needed
-                values = {
-                    "word": chapter_word_freq,
-                    "numInChap": values[0],
-                    "numInKjv": ("{:,}".format(values[1])),
-                    "weightedRelFreq": values[2],
-                    "simpleRelFreq": ("{:,}".format(values[3])),
-                }
-                write_file.write(table_row.substitute(values))
-            else:  # Start of <body> tag
-                # Include thousands separators in the numbers below
-                words_in_chapter = "{:,}".format(
-                    relative_word_frequency[chapter_word_freq][0]
-                )
-                words_in_bible_formatted = "{:,}".format(words_in_bible)
-                values = {
-                    "h1": f"{key}: KJV Chapter Word Frequencies",
-                    "h2": f"{words_in_chapter} word occurrences in {key} in the KJV ({words_in_bible_formatted} word occurrences in the entire KJV):",
-                }
-                write_file.write(body_start.substitute(values))
-                write_file.write(table_start)
-
-        write_file.write(table_end)
-        write_file.write(BODY_ENDING)
         write_file.write("</html>")
 
 

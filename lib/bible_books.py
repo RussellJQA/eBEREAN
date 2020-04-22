@@ -63,6 +63,18 @@ bible_books = {
     "1 John": ("1Jn", 5),
     "2 John": ("2Jn", 1),
     "3 John": ("3Jn", 1),
-    "Jude": ("Jde", 1),
+    "Jude": ("Jud", 1),
     "Revelation": ("Rev", 22),
 }
+
+
+def main():
+    book_lengths = {
+        bible_books[bible_book][0]: bible_books[bible_book][1]
+        for bible_book in bible_books
+    }
+    print(book_lengths)
+
+
+if __name__ == "__main__":
+    main()

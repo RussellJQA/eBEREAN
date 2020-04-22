@@ -8,10 +8,14 @@ import json
 import os
 
 from lib.get_bible_metadata import get_word_frequency, get_book_nums
-
-from chapter_word_freq_html import write_html_file
+from lib.bible_books import bible_books
+from chapter_word_freq_html import get_main_tag, write_html_file
 
 bible_metadata_folder = os.path.join(os.getcwd(), "BibleMetaData")
+
+book_lengths = {
+    bible_books[bible_book][0]: bible_books[bible_book][1] for bible_book in bible_books
+}
 
 
 def round_4_to_6_sigfigs(num):
@@ -195,8 +199,27 @@ def write_csv_and_html(
     #       https://github.com/stefanhoelzl/vue.py/blob/master/examples/grid_component/app.py
     #   6. https://anvil.works/docs/data-tables/data-tables-in-code#searching-querying-a-table
 
+    main_tag = get_main_tag(words_in_bible, key, relative_word_frequency)
     html_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.html")
-    write_html_file(words_in_bible, key, html_fn, relative_word_frequency)
+    write_html_file(html_fn, f"{key}: KJV Chapter Word Frequencies", main_tag)
+
+
+def book_index_html(book_abbrev, book_folder):
+    print(f"Generating files for {book_abbrev}")
+    main_tag = "<main>\n"
+    for chapter in range(1, book_lengths[book_abbrev] + 1):
+        book_and_chapter = f"{book_abbrev} {str(chapter).zfill(3)}"
+        main_tag += f"<a href='{book_and_chapter} word_freq.html'>{book_and_chapter} Word Frequencies</a>&nbsp;&nbsp;\n"
+        fn = f"{book_and_chapter} word_freq.csv"
+        main_tag += (
+            f"<a download='{fn}'' href='{fn}'' target='_blank'>Download {fn}</a><br>\n"
+        )
+    main_tag += "</main>\n"
+
+    html_fn = os.path.join(book_folder, f"{book_abbrev} index.html")
+    write_html_file(
+        html_fn, f"{book_abbrev}: KJV Chapter Word Frequencies", main_tag,
+    )
 
 
 def generate_word_freq_files():
@@ -233,9 +256,12 @@ def generate_word_freq_files():
             book_folder = handle_book_folder(
                 chapter_words_folder, book_folder, previous_book_abbrev, book_abbrev
             )
+            if book_abbrev != previous_book_abbrev:
+                book_index_html(book_abbrev, book_folder)
             write_csv_and_html(
                 words_in_bible, key, book_abbrev, book_folder, relative_word_frequency
             )
+
             previous_book_abbrev = book_abbrev
 
     with open(
