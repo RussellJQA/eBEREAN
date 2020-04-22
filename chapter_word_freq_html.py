@@ -3,8 +3,6 @@ import string
 # TODO: Add an index page
 
 BODY_ENDING = """
-            </tbody>
-        </table>
     </main>
     <footer class='page' role='contentinfo'><p>Copyright &copy; 2020 by Russell Johnson</p></footer>
 </body>
@@ -24,7 +22,7 @@ head = string.Template(
     <meta name='generator' content="HTML">
     <meta property="og:site_name" content="RussellJ"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>$key: KJV Chapter Word Frequencies</title>
+    <title>$title</title>
      <!-- The table styling in this style tag is from https://www.w3schools.com/html/html_tables.asp -->
     <style>
         table,
@@ -55,10 +53,10 @@ body_start = string.Template(
     """
 <body>
     <header class='page' role='banner'>
-        <h1>$key: KJV Chapter Word Frequencies</h1>
+        <h1>$h1</h1>
     </header>
     <main id='main_content'  class='page' class='page' role='main' tabindex='-1'>
-        <h2>$wordsInChap word occurrences in $key in the KJV ($words_in_bible word occurrences in the entire KJV):</h2>
+        <h2>$h2</h2>
         
         <p>
             The columns in the sortable table below are:
@@ -72,6 +70,10 @@ body_start = string.Template(
             (See TBD for an explanation of both types of relative frequency.)
         </p>
 
+"""
+)
+
+table_start = """
         <!-- Table sorting uses the following script, as explained at
         https://stackoverflow.com/questions/10683712/html-table-sort/51648529 -->
         <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
@@ -91,7 +93,6 @@ body_start = string.Template(
                 </tr>
             </thead>
             <tbody>"""
-)
 
 table_row = string.Template(
     """
@@ -104,6 +105,10 @@ table_row = string.Template(
                 </tr>"""
 )
 
+table_end = """
+            </tbody>
+        </table>"""
+
 
 def write_html_file(words_in_bible, key, html_fn, relative_word_frequency):
 
@@ -115,8 +120,7 @@ def write_html_file(words_in_bible, key, html_fn, relative_word_frequency):
         # Write <head> tag
 
         values = {
-            "key": key,
-            "words_in_bible": words_in_bible,
+            "title": f"{key}: KJV Chapter Word Frequencies",
         }
         write_file.write(head.substitute(values))
 
@@ -134,19 +138,21 @@ def write_html_file(words_in_bible, key, html_fn, relative_word_frequency):
                     "simpleRelFreq": ("{:,}".format(values[3])),
                 }
                 write_file.write(table_row.substitute(values))
-            else:
+            else:  # Start of <body> tag
                 # Include thousands separators in the numbers below
+                words_in_chapter = "{:,}".format(
+                    relative_word_frequency[chapter_word_freq][0]
+                )
+                words_in_bible_formatted = "{:,}".format(words_in_bible)
                 values = {
-                    "key": key,
-                    "wordsInChap": (
-                        "{:,}".format(relative_word_frequency[chapter_word_freq][0])
-                    ),
-                    "words_in_bible": ("{:,}".format(words_in_bible)),
+                    "h1": f"{key}: KJV Chapter Word Frequencies",
+                    "h2": f"{words_in_chapter} word occurrences in {key} in the KJV ({words_in_bible_formatted} word occurrences in the entire KJV):",
                 }
                 write_file.write(body_start.substitute(values))
+                write_file.write(table_start)
 
+        write_file.write(table_end)
         write_file.write(BODY_ENDING)
-
         write_file.write("</html>")
 
 
