@@ -1,5 +1,7 @@
 import string
 
+# TODO: Add an index page
+
 BODY_ENDING = """
             </tbody>
         </table>
@@ -22,7 +24,7 @@ head = string.Template(
     <meta name='generator' content="HTML">
     <meta property="og:site_name" content="RussellJ"> 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chapter Word Frequencies for $key in the KJV</title>
+    <title>$key: KJV Chapter Word Frequencies</title>
      <!-- The table styling in this style tag is from https://www.w3schools.com/html/html_tables.asp -->
     <style>
         table,
@@ -53,7 +55,7 @@ body_start = string.Template(
     """
 <body>
     <header class='page' role='banner'>
-        <h1>Chapter Word Frequencies for $key in the KJV</h1>
+        <h1>$key: KJV Chapter Word Frequencies</h1>
     </header>
     <main id='main_content'  class='page' class='page' role='main' tabindex='-1'>
         <h2>$wordsInChap word occurrences in $key in the KJV ($words_in_bible word occurrences in the entire KJV):</h2>
