@@ -206,15 +206,16 @@ def write_csv_and_html(
 
 def book_index_html(book_abbrev, book_folder):
     print(f"Generating files for {book_abbrev}")
-    main_tag = "<main>\n"
+    main_tag = "    <main>\n"
     for chapter in range(1, book_lengths[book_abbrev] + 1):
         book_and_chapter = f"{book_abbrev} {str(chapter).zfill(3)}"
-        main_tag += f"<a href='{book_and_chapter} word_freq.html'>{book_and_chapter} Word Frequencies</a>&nbsp;&nbsp;\n"
+        main_tag += f"        <a href='{book_and_chapter} word_freq.html'>{book_and_chapter} Word Frequencies</a>&nbsp;&nbsp;\n"
+
+        # TODO: Move this within child HTML file
         fn = f"{book_and_chapter} word_freq.csv"
-        main_tag += (
-            f"<a download='{fn}'' href='{fn}'' target='_blank'>Download {fn}</a><br>\n"
-        )
-    main_tag += "</main>\n"
+        main_tag += f"            <a download='{fn}'' href='{fn}'' target='_blank'>Download {fn}</a><br>\n"
+
+    main_tag += "    </main>\n"
 
     html_fn = os.path.join(book_folder, f"{book_abbrev} index.html")
     write_html_file(

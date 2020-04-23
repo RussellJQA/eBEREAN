@@ -1,21 +1,28 @@
 import string
 
+from datetime import date
+
 # TODO: Add a master index page
 # TODO: Add favicon
 
+meta_name_template = string.Template(
+    """<meta charset="UTF-8">
+    <meta name="description" content="$description"> 
+    <meta name="date" content="$datestamp"> 
+    <meta name="last-modified" content="$datestamp">     
+    <meta name="language" content="english" >
+    <meta name="author" content="$author ($site)" >
+    <meta name="copyright" content="$year $author. All rights reserved." >
+    <meta name="generator" content="HTML">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">"""
+)
+
 head = string.Template(
     """
+
 <head>
-    <meta charset="UTF-8">
-    <meta name='description' content='eBEREAN: electronic Bible Exploration REsources and ANalysis.'> 
-    <meta name='date' content='2020-04-20'> 
-    <meta name='last-modified' content='2020-04-20'>     
-    <meta name='language' content='english' >
-    <meta name='author' content='Russell Johnson (RussellJ.heliohost.org)' >
-    <meta name='copyright' content="2020 Russell Johnson. All rights reserved." >
-    <meta name='generator' content="HTML">
-    <meta property="og:site_name" content="RussellJ"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    $meta_names
+    <meta property="og:site_name" content="$og_site_name"> 
     <title>$title</title>
      <!-- The table styling in this style tag is from https://www.w3schools.com/html/html_tables.asp -->
     <style>
@@ -39,19 +46,21 @@ head = string.Template(
         }
     </style>
 </head>
+
 """
 )
 
 header = string.Template(
     """
-    <header class='page' role='banner'>
+    <header class="page" role="banner">
         <h1>$h1</h1>
-    </header>"""
+    </header>
+"""
 )
 
 main_start = string.Template(
     """
-    <main id='main_content'  class='page' class='page' role='main' tabindex='-1'>
+    <main id="main_content" class="page" class="page" role="main" tabindex="-1">
         <h2>$h2</h2>
         
         <p>
@@ -94,8 +103,8 @@ table_row = string.Template(
     """
                 <tr>
                     <td>$word</td>
-                    <td class='integer'>$numInChap</td>
-                    <td class='integer'>$numInKjv</td>
+                    <td class="integer">$numInChap</td>
+                    <td class="integer">$numInKjv</td>
                     <td>$weightedRelFreq</td>
                     <td>$simpleRelFreq</td>
                 </tr>"""
@@ -106,9 +115,10 @@ table_end = """
         </table>
 """
 
-footer = """
-    <footer class='page' role='contentinfo'><p>Copyright &copy; 2020 by Russell Johnson</p></footer>
+footer = string.Template(
+    """    <footer class="page" role="contentinfo"><p>Copyright &copy; $year by $author</p></footer>
 """
+)
 
 
 def get_main_tag(words_in_bible, key, relative_word_frequency):
@@ -150,12 +160,28 @@ def write_html_file(html_fn, title_h1, main_tag):
         write_file.write("<!doctype html>")
         write_file.write("<html lang='en'>")
 
-        write_file.write(head.substitute({"title": title_h1}))  # Write <head> tag
+        datestamp = date.today().strftime("%Y-%m-%d")
+        year = datestamp[0:4]
+        author = "Russell Johnson"
+
+        meta_tags = meta_name_template.substitute(
+            description="eBEREAN: electronic Bible Exploration REsources and ANalysis.",
+            datestamp=datestamp,
+            site="RussellJ.heliohost.org",
+            author=author,
+            year=year,
+        )
+
+        write_file.write(
+            head.substitute(
+                meta_names=meta_tags, og_site_name="RussellJ", title=title_h1
+            )
+        )
 
         write_file.write("<body>")  # Write start of <body> tag
-        write_file.write(header.substitute({"h1": title_h1}))
+        write_file.write(header.substitute(h1=title_h1))
         write_file.write(main_tag)  #   Write <main> tag
-        write_file.write(footer)
+        write_file.write(footer.substitute(year=year, author=author))
         write_file.write("</body>\n\n")  # Write end of <body> tag
 
         write_file.write("</html>")
