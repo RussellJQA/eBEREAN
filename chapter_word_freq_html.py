@@ -62,7 +62,7 @@ main_start = string.Template(
     """
     <main id="main_content" class="page" class="page" role="main" tabindex="-1">
         <h2>$h2</h2>
-        
+        <a download="$fn" href="$fn" target="_blank">Download $fn</a><br>
         <p>
             The columns in the sortable table below are:
             <ul>
@@ -128,24 +128,24 @@ def get_main_tag(words_in_bible, key, relative_word_frequency):
     words_in_chapter = "{:,}".format(relative_word_frequency["TOTAL WORDS"][0])
     words_in_bible_formatted = "{:,}".format(words_in_bible)
     #   Include thousands separators
-    values = {
-        "h2": f"{words_in_chapter} word occurrences in {key} in the KJV ({words_in_bible_formatted} word occurrences in the entire KJV):",
-    }
-    main_tag += main_start.substitute(values)
+    book_and_chapter = f"{key[0:3]}{str(key[4:]).zfill(3)}"
+    main_tag += main_start.substitute(
+        h2=f"{words_in_chapter} word occurrences in {key} in the KJV ({words_in_bible_formatted} word occurrences in the entire KJV):",
+        fn=f"{book_and_chapter}_word_freq.csv",
+    )
 
     main_tag += table_start
     for count, chapter_word_freq_key in enumerate(relative_word_frequency):
         if count:  # Table row data
             values = relative_word_frequency[chapter_word_freq_key]
             # Include thousands separators, where needed
-            table_row_values = {
-                "word": chapter_word_freq_key,
-                "numInChap": values[0],
-                "numInKjv": ("{:,}".format(values[1])),
-                "weightedRelFreq": values[2],
-                "simpleRelFreq": ("{:,}".format(values[3])),
-            }
-            main_tag += table_row.substitute(table_row_values)
+            main_tag += table_row.substitute(
+                word=chapter_word_freq_key,
+                numInChap=values[0],
+                numInKjv=("{:,}".format(values[1])),
+                weightedRelFreq=values[2],
+                simpleRelFreq=("{:,}".format(values[3])),
+            )
     main_tag += table_end
 
     main_tag += "    </main>"  # Closing <main> tag
@@ -157,7 +157,7 @@ def write_html_file(html_fn, title_h1, main_tag):
 
     with open(html_fn, "w") as write_file:
 
-        write_file.write("<!doctype html>")
+        write_file.write("<!doctype html>\n")
         write_file.write("<html lang='en'>")
 
         datestamp = date.today().strftime("%Y-%m-%d")

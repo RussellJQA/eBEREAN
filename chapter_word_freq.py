@@ -58,7 +58,7 @@ def desc_value2_asc_key(element):
     Of those, weight "composition" more highly (by giving it a more negative) sort key, so that it will be listed
     earlier in the .csv file.
 
-    The sort_key calculations for the 2 corresponding rows of file "Exo 030 word_freq_bible.csv" are:
+    The sort_key calculations for the 2 corresponding rows of file "Exo030_word_freq.csv" are:
 
         composition,2,2,815.1164948453609
             element == ["composition", [1,1,815.1164948453609]]
@@ -184,7 +184,7 @@ def write_csv_and_html(
     book_abbrev = key[0:3]
     chapter = key[4:].zfill(3)  # 0-pad for consistent cross-platform sorting
 
-    csv_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.csv")
+    csv_fn = os.path.join(book_folder, f"{book_abbrev}{chapter}_word_freq.csv")
     write_csv_file(words_in_bible, key, csv_fn, relative_word_frequency)
 
     # In addition to the above .csv file, generate an .html file with sortable tables
@@ -200,24 +200,23 @@ def write_csv_and_html(
     #   6. https://anvil.works/docs/data-tables/data-tables-in-code#searching-querying-a-table
 
     main_tag = get_main_tag(words_in_bible, key, relative_word_frequency)
-    html_fn = os.path.join(book_folder, f"{book_abbrev} {chapter} word_freq.html")
+    html_fn = os.path.join(book_folder, f"{book_abbrev}{chapter}_word_freq.html")
     write_html_file(html_fn, f"{key}: KJV Chapter Word Frequencies", main_tag)
 
 
 def book_index_html(book_abbrev, book_folder):
-    print(f"Generating files for {book_abbrev}")
-    main_tag = "    <main>\n"
-    for chapter in range(1, book_lengths[book_abbrev] + 1):
-        book_and_chapter = f"{book_abbrev} {str(chapter).zfill(3)}"
-        main_tag += f"        <a href='{book_and_chapter} word_freq.html'>{book_and_chapter} Word Frequencies</a>&nbsp;&nbsp;\n"
 
-        # TODO: Move this within child HTML file
-        fn = f"{book_and_chapter} word_freq.csv"
-        main_tag += f"            <a download='{fn}'' href='{fn}'' target='_blank'>Download {fn}</a><br>\n"
+    print(f"Generating files for {book_abbrev}")
+
+    main_tag = "    <main id='main_content' class='page' class='page' role='main' tabindex='-1'>\n"
+
+    for chapter in range(1, book_lengths[book_abbrev] + 1):
+        book_and_chapter = f"{book_abbrev}{str(chapter).zfill(3)}"
+        main_tag += f"        <a href='{book_and_chapter}_word_freq.html'>{book_and_chapter} Word Frequencies</a><br>\n"
 
     main_tag += "    </main>\n"
 
-    html_fn = os.path.join(book_folder, f"{book_abbrev} index.html")
+    html_fn = os.path.join(book_folder, f"{book_abbrev}_index.html")
     write_html_file(
         html_fn, f"{book_abbrev}: KJV Chapter Word Frequencies", main_tag,
     )
