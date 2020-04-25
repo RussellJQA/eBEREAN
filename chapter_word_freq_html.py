@@ -1,29 +1,29 @@
-import string
-
 from datetime import date
+
+from mako.template import Template
 
 # TODO: Add a master index page
 # TODO: Add favicon
 
-meta_name_template = string.Template(
+meta_name_mako = Template(
     """<meta charset="UTF-8">
-    <meta name="description" content="$description"> 
-    <meta name="date" content="$datestamp"> 
-    <meta name="last-modified" content="$datestamp">     
+    <meta name="description" content="${description}"> 
+    <meta name="date" content="${datestamp}"> 
+    <meta name="last-modified" content="${datestamp}">     
     <meta name="language" content="english" >
-    <meta name="author" content="$author ($site)" >
-    <meta name="copyright" content="$year $author. All rights reserved." >
+    <meta name="author" content="${author} (${site})" >
+    <meta name="copyright" content="${year} ${author}. All rights reserved." >
     <meta name="generator" content="HTML">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">"""
 )
 
-head = string.Template(
+head = Template(
     """
 
 <head>
-    $meta_names
-    <meta property="og:site_name" content="$og_site_name"> 
-    <title>$title</title>
+    ${meta_names}
+    <meta property="og:site_name" content="${og_site_name}"> 
+    <title>${title}</title>
      <!-- The table styling in this style tag is from https://www.w3schools.com/html/html_tables.asp -->
     <style>
         table,
@@ -50,19 +50,19 @@ head = string.Template(
 """
 )
 
-header = string.Template(
+header = Template(
     """
     <header class="page" role="banner">
-        <h1>$h1</h1>
+        <h1>${h1}</h1>
     </header>
 """
 )
 
-main_start = string.Template(
+main_start = Template(
     """
     <main id="main_content" class="page" class="page" role="main" tabindex="-1">
-        <h2>$h2</h2>
-        <a download="$fn" href="$fn" target="_blank">Download $fn</a><br>
+        <h2>${h2}</h2>
+        <a download="${fn}" href="${fn}" target="_blank">Download ${fn}</a><br>
         <p>
             The columns in the sortable table below are:
             <ul>
@@ -99,14 +99,14 @@ table_start = """
             </thead>
             <tbody>"""
 
-table_row = string.Template(
+table_row = Template(
     """
                 <tr>
-                    <td>$word</td>
-                    <td class="integer">$numInChap</td>
-                    <td class="integer">$numInKjv</td>
-                    <td>$weightedRelFreq</td>
-                    <td>$simpleRelFreq</td>
+                    <td>${word}</td>
+                    <td class="integer">${numInChap}</td>
+                    <td class="integer">${numInKjv}</td>
+                    <td>${weightedRelFreq}</td>
+                    <td>${simpleRelFreq}</td>
                 </tr>"""
 )
 
@@ -115,8 +115,8 @@ table_end = """
         </table>
 """
 
-footer = string.Template(
-    """    <footer class="page" role="contentinfo"><p>Copyright &copy; $year by $author</p></footer>
+footer = Template(
+    """    <footer class="page" role="contentinfo"><p>Copyright &copy; ${year} by ${author}</p></footer>
 """
 )
 
@@ -129,7 +129,7 @@ def get_main_tag(words_in_bible, key, relative_word_frequency):
     words_in_bible_formatted = "{:,}".format(words_in_bible)
     #   Include thousands separators
     book_and_chapter = f"{key[0:3]}{str(key[4:]).zfill(3)}"
-    main_tag += main_start.substitute(
+    main_tag += main_start.render(
         h2=f"{words_in_chapter} word occurrences in {key} in the KJV ({words_in_bible_formatted} word occurrences in the entire KJV):",
         fn=f"{book_and_chapter}_word_freq.csv",
     )
@@ -139,7 +139,7 @@ def get_main_tag(words_in_bible, key, relative_word_frequency):
         if count:  # Table row data
             values = relative_word_frequency[chapter_word_freq_key]
             # Include thousands separators, where needed
-            main_tag += table_row.substitute(
+            main_tag += table_row.render(
                 word=chapter_word_freq_key,
                 numInChap=values[0],
                 numInKjv=("{:,}".format(values[1])),
@@ -164,7 +164,7 @@ def write_html_file(html_fn, title_h1, main_tag):
         year = datestamp[0:4]
         author = "Russell Johnson"
 
-        meta_tags = meta_name_template.substitute(
+        meta_tags = meta_name_mako.render(
             description="eBEREAN: electronic Bible Exploration REsources and ANalysis.",
             datestamp=datestamp,
             site="RussellJ.heliohost.org",
@@ -173,15 +173,13 @@ def write_html_file(html_fn, title_h1, main_tag):
         )
 
         write_file.write(
-            head.substitute(
-                meta_names=meta_tags, og_site_name="RussellJ", title=title_h1
-            )
+            head.render(meta_names=meta_tags, og_site_name="RussellJ", title=title_h1)
         )
 
         write_file.write("<body>")  # Write start of <body> tag
-        write_file.write(header.substitute(h1=title_h1))
+        write_file.write(header.render(h1=title_h1))
         write_file.write(main_tag)  #   Write <main> tag
-        write_file.write(footer.substitute(year=year, author=author))
+        write_file.write(footer.render(year=year, author=author))
         write_file.write("</body>\n\n")  # Write end of <body> tag
 
         write_file.write("</html>")
