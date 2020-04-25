@@ -1,5 +1,6 @@
 from datetime import date
 
+# pip-installed
 from mako.template import Template
 
 # TODO: Add a master index page
@@ -7,12 +8,12 @@ from mako.template import Template
 
 meta_name_mako = Template(
     """<meta charset="UTF-8">
-    <meta name="description" content="${description}"> 
-    <meta name="date" content="${datestamp}"> 
-    <meta name="last-modified" content="${datestamp}">     
-    <meta name="language" content="english" >
-    <meta name="author" content="${author} (${site})" >
-    <meta name="copyright" content="${year} ${author}. All rights reserved." >
+    <meta name="description" content="${description}">
+    <meta name="date" content="${datestamp}">
+    <meta name="last-modified" content="${datestamp}">
+    <meta name="language" content="english">
+    <meta name="author" content="${author} (${site})">
+    <meta name="copyright" content="${year} ${author}. All rights reserved.">
     <meta name="generator" content="HTML">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">"""
 )
@@ -22,9 +23,9 @@ head = Template(
 
 <head>
     ${meta_names}
-    <meta property="og:site_name" content="${og_site_name}"> 
+    <meta property="og:site_name" content="${og_site_name}">
     <title>${title}</title>
-     <!-- The table styling in this style tag is from https://www.w3schools.com/html/html_tables.asp -->
+    <!-- The table styling in this style tag is from https://www.w3schools.com/html/html_tables.asp -->
     <style>
         table,
         th,
@@ -116,7 +117,8 @@ table_end = """
 """
 
 footer = Template(
-    """    <footer class="page" role="contentinfo"><p>Copyright &copy; ${year} by ${author}</p></footer>
+    """
+    <footer class="page" role="contentinfo"><p>Copyright &copy; ${year} by ${author}</p></footer>
 """
 )
 
