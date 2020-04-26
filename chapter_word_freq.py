@@ -208,7 +208,7 @@ def book_index_html(book_abbrev, book_folder):
 
     print(f"Generating files for {book_abbrev}")
 
-    main_tag = "    <main id='main_content' class='page' class='page' role='main' tabindex='-1'>\n"
+    main_tag = "    <main id='main_content' role='main' tabindex='-1'>\n"
 
     for chapter in range(1, book_lengths[book_abbrev] + 1):
         book_and_chapter = f"{book_abbrev}{str(chapter).zfill(3)}"

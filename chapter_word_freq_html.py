@@ -53,7 +53,7 @@ head = Template(
 
 header = Template(
     """
-    <header class="page" role="banner">
+    <header role="banner">
         <h1>${h1}</h1>
     </header>
 """
@@ -61,7 +61,7 @@ header = Template(
 
 main_start = Template(
     """
-    <main id="main_content" class="page" class="page" role="main" tabindex="-1">
+    <main id="main_content" role="main" tabindex="-1">
         <h2>${h2}</h2>
         <a download="${fn}" href="${fn}" target="_blank">Download ${fn}</a><br>
         <p>
@@ -118,7 +118,7 @@ table_end = """
 
 footer = Template(
     """
-    <footer class="page" role="contentinfo"><p>Copyright &copy; ${year} by ${author}</p></footer>
+    <footer role="contentinfo"><p>Copyright &copy; ${year} by ${author}</p></footer>
 """
 )
 
