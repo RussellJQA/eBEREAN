@@ -1,46 +1,7 @@
-<!doctype html>
-<html lang='en'>
+## bible_chapter_template.mako
+<%inherit file="base.mako"/>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="description" content="${description}">
-    <meta name="date" content="${datestamp}">
-    <meta name="last-modified" content="${datestamp}">
-    <meta name="language" content="english">
-    <meta name="author" content="${author} (${site})">
-    <meta name="copyright" content="${year} ${author}. All rights reserved.">
-    <meta name="generator" content="HTML">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:site_name" content="${og_site_name}">
-    <title>${title_h1}</title>
-    <!-- The table styling in this style tag is from https://www.w3schools.com/html/html_tables.asp -->
-    <style>
-        table,
-        th,
-        td {
-            border: 1px solid black;
-        }
-
-        th,
-        td {
-            padding: 15px;
-        }
-
-        .integer {
-            text-align: right;
-        }
-
-        footer {
-            text-align: center
-        }
-    </style>
-</head>
-
-<body>
-    <header class="page" role="banner">
-        <h1>${title_h1}</h1>
-    </header>
-    <main id="main_content" class="page" class="page" role="main" tabindex="-1">
+    <main id="main_content" role="main" tabindex="-1">
         <h2>${words_in_chapter} word occurrences in ${book_abbrev} ${chapter} in the KJV (${words_in_bible} word occurrences in the entire KJV):</h2>
         <a download="${book_abbrev}${str(chapter).zfill(3)}_word_freq.csv" href="${book_abbrev}${str(chapter).zfill(3)}_word_freq.csv" target="_blank">Download ${book_abbrev}${str(chapter).zfill(3)}_word_freq.csv</a><br>
         <p>
@@ -86,9 +47,3 @@
             </tbody>
         </table>
     </main>
-    <footer class="page" role="contentinfo">
-        <p>Copyright &copy; ${year} by ${author}</p>
-    </footer>
-</body>
-
-</html>
