@@ -1,3 +1,5 @@
+import json
+
 bible_books = {
     "Genesis": ("Gen", 50),
     "Exodus": ("Exo", 40),
@@ -69,11 +71,10 @@ bible_books = {
 
 
 def main():
-    book_lengths = {
-        bible_books[bible_book][0]: bible_books[bible_book][1]
-        for bible_book in bible_books
-    }
-    print(book_lengths)
+    with open(
+        r"bible_books.json", "w"
+    ) as write_file:
+        json.dump(bible_books, write_file, indent=4)
 
 
 if __name__ == "__main__":
