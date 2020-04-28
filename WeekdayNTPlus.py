@@ -9,7 +9,7 @@ A consolidation of several Bible Reading plans:
 
 from lib.bible_books import bible_books
 
-from create_bible_plan import create_plan_with_playlists, get_weekday, process_reading
+from create_bible_plan import create_plan_with_playlists
 
 from WeekdayPsalms import WeekdayPsalms
 from WeekendPsalms import WeekendPsalms

@@ -4,13 +4,6 @@ import os
 bible_metadata_folder = os.path.join(os.getcwd(), "BibleMetaData")
 
 
-def get_word_frequency():
-    read_fn = os.path.join(bible_metadata_folder, "word_frequency.json")
-    with open(read_fn, "r") as read_file:
-        word_frequency = json.load(read_file)
-        return word_frequency
-
-
 def get_book_nums():
     read_fn = os.path.join(bible_metadata_folder, "book_numbers.json")
     with open(read_fn, "r") as read_file:
@@ -23,4 +16,3 @@ def get_verse_counts():
     with open(read_fn, "r") as read_file:
         verse_counts = json.load(read_file)
         return verse_counts
-
