@@ -1,4 +1,5 @@
 import json
+import os
 
 bible_books = {
     "Genesis": ("Gen", 50),
@@ -71,8 +72,9 @@ bible_books = {
 
 
 def main():
+    bible_metadata_folder = os.path.join(os.getcwd(), "BibleMetaData")
     with open(
-        r"bible_books.json", "w"
+        os.path.join(bible_metadata_folder, r"bible_books.json"), "w"
     ) as write_file:
         json.dump(bible_books, write_file, indent=4)
 
