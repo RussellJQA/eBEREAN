@@ -2,13 +2,12 @@
 Create an MP3 playlist for each day in the specified Bible reading plan.
 """
 
-import os
 import re
 
 from lib.bible_books import bible_books
 
 
-def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
+def create_bible_plan_playlists(cal_date, full_refs, m3u_ext="m3u"):
     """
     An .m3u8 file is essentially the same as an .m3u file, but it's UTF-8 encoded.
     .m3u was chosen as the default extension since some platforms don't support .m3u8.
@@ -25,7 +24,7 @@ def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
     mp3_path = "/storage/emulated/0/Music/Bible-Audio/"
     book_numbers_and_names = {}
     book_num = 0
-    for (book_name, (book_abbrev, chapters)) in bible_books.items():
+    for (book_name, (book_abbrev, _)) in bible_books.items():
         book_num += 1  # "1 Thessalonians" => 52
         book_number_and_name = (
             (str(book_num)).zfill(2) + "_" + (book_name.replace(" ", "-").casefold())
@@ -38,8 +37,12 @@ def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
         write_file.write("#EXTM3U\n")
         for full_ref in full_refs:
 
-            pattern_book1 = r"([1-3A-Z][a-z][a-z] \d{1,3})"  # "Lev 27"
-            pattern_book2 = r"([1-3A-Z][a-z][a-z] \d{1,3})"  # "Num 1"
+            pattern_book1 = r"([1-3A-Z][A-Za-z][a-z] \d{1,3})"
+            # "Lev 27", "1Sa 31", etc.
+
+            pattern_book2 = r"([1-3A-Z][A-Za-z][a-z] \d{1,3})"
+            # "Num 1", , "2Sa 1", etc.
+
             pattern = f"{pattern_book1}(-){pattern_book2}"
             match = re.search(pattern, full_ref)
             if match:  # full_ref references 1 chapter each from 2 consecutive books:
@@ -49,7 +52,7 @@ def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
 
                 # Handle 1st reference of exactly 1 chapter
                 (
-                    book_abbr,
+                    _,
                     book_number_and_name,
                     book_num,
                     chapter_verse_ref,
@@ -63,7 +66,7 @@ def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
 
                 # Handle 2nd reference of exactly 1 chapter
                 (
-                    book_abbr,
+                    _,
                     book_number_and_name,
                     book_num,
                     chapter_verse_ref,
@@ -78,23 +81,22 @@ def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
             else:  # full_ref only contains references within the same book
 
                 (
-                    book_abbr,
+                    _,
                     book_number_and_name,
                     book_num,
                     chapter_verse_ref,
                 ) = get_book_chapter_verse(full_ref)
 
-                pattern1 = r"([1-3A-Z][a-z][a-z] )(\d{1,3})(-)(\d{1,3})"  # "Psa 1-2"
+                pattern1 = r"([1-3A-Z][A-Za-z][a-z] )(\d{1,3})(-)(\d{1,3})"  # "Psa 1-2"
                 match1 = re.search(pattern1, full_ref)
                 # Handle readings with multiple chapters in the same book:
                 #   "Gen 1-2"     -> "01_gen_1" and "01_gen_2"
                 #   "Psa 1-2"     -> "19_psalm_1" and "19_psalm_2"
                 #   "Psa 52-54"   -> "19_psalm_52", 19_psalm_53", and "19_psalm_54"
                 #   "Psa 123-125" -> "19_psalm_123", 19_psalm_124", and "19_psalm_125"
+                #   "1Sa 12-13"   -> "09_1-samuel_012" and "09_1-samuel_013"
 
-                pattern2 = (
-                    r"([1-3A-Z][a-z][a-z] )(\d{1,3})(\:\d{1,3}\-)(\d{1,3})(\:)(\d{1,3})"
-                )
+                pattern2 = r"([1-3A-Z][A-Za-z][a-z] )(\d{1,3})(\:\d{1,3}\-)(\d{1,3})(\:)(\d{1,3})"
                 match2 = re.search(pattern2, full_ref)
 
                 if match1 or match2:
@@ -141,7 +143,7 @@ def create_bible_plan_playlists(plan, cal_date, full_refs, m3u_ext="m3u"):
 
 
 # Example of a similar MP3 playlist taken from my Nexus 6P:
-"""
+comment = """
 #EXTM3U
 #EXTINF:-1,unknown - 19_psalms_002
 /storage/emulated/0/Music/Bible-Audio/19_psalms/19_psalms_002.mp3
