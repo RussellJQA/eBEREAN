@@ -116,37 +116,6 @@ def desc_value_asc_key(element):
     return sort_key
 
 
-def build_frequency_lists(frequency):
-
-    total_words = 0  # The final value of total_words is 790,663
-    words_with_this_frequency = []
-    frequency_lists = {}
-    prev_occurrences = 0
-    occurrences = 0
-    for element in sorted(frequency.items(), key=desc_value_asc_key):
-        # Split into lists of words for each frequency:
-        word = element[0]
-        occurrences = element[1]  # For "the", occurrences is 64016
-        total_words += occurrences
-        if prev_occurrences and occurrences != prev_occurrences:
-            frequency_lists[prev_occurrences] = words_with_this_frequency[:]
-            words_with_this_frequency.clear()
-        words_with_this_frequency.append(word)
-        prev_occurrences = occurrences
-    frequency_lists[occurrences] = words_with_this_frequency[:]
-    frequency_lists = {total_words: ["TOTAL WORDS"], **frequency_lists}
-
-    total_words2 = 0  # Essentially, recalc total_words a 2nd way, for comparison.
-    for key, value in sorted(frequency_lists.items(), reverse=True):
-        if value != ["TOTAL WORDS"]:
-            total_words2 += int(key) * len(value)
-            # Increment by number of occurrences * number of words with that number
-    if total_words != total_words2:
-        print(f"total_words ({total_words}) != to total_words2 ({total_words2})")
-
-    return frequency_lists
-
-
 def main():
 
     book_abbrevs = calc_and_write_book_abbrevs()  # Calculate/write dict

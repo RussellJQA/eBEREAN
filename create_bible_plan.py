@@ -17,10 +17,9 @@ def get_weekday_delta(date):
     day_of_week = date.strftime("%a")
     if day_of_week == "Fri":
         return 3
-    elif day_of_week == "Sat":
+    if day_of_week == "Sat":
         return 2
-    else:
-        return 1
+    return 1
 
 
 def create_plan_with_playlists(plan, daily_readings):
@@ -36,12 +35,12 @@ def create_plan_with_playlists(plan, daily_readings):
         for (cal_date, full_refs) in sorted(daily_readings.items()):
             # items() returns a list of (key, value) tuples
             previous_month = print_daily_reading(
-                plan, cal_date, previous_month, full_refs, readings_file
+                cal_date, previous_month, full_refs, readings_file
             )
-            create_bible_plan_playlists(plan, cal_date, full_refs)
+            create_bible_plan_playlists(cal_date, full_refs)
 
 
-def print_daily_reading(plan, cal_date, previous_month, full_refs, readings_file):
+def print_daily_reading(cal_date, previous_month, full_refs, readings_file):
 
     # TODO: Refactor to add additional output formats, such as CSV or TSV; HTML; and RTF
 
@@ -81,34 +80,31 @@ def process_reading(
         if match1 and match2:
             return f"{match1.group(1)}:1-{match2.group(1)}:{match2.group(3)}"
 
-        else:
-            # Merge "Num 7:48-89" and (Num) "8" to "Num 7:48-8:26"   (3/3)
-            pattern1 = r"([1-3A-Z][a-z][a-z] )(\d{1,3}\:\d{1,3})(\-)(\d{1,3})"
-            match1 = re.search(pattern1, ref1)
-            pattern2 = r"(\d{1,3})"
-            match2 = re.search(pattern2, ref2)
-            if match1 and match2:
-                book_with_space = match1.group(1)
-                ref1_chapter = match1.group(2)
-                ref2_chapter = match2.group(1)
-                verse_counts = get_verse_counts()  # TODO: Avoid calling multiple times
-                verses = verse_counts[f"{book_with_space}{ref2_chapter}"]
-                return f"{book_with_space}{ref1_chapter}-{ref2_chapter}:{verses}"
+        # Merge "Num 7:48-89" and (Num) "8" to "Num 7:48-8:26"   (3/3)
+        pattern1 = r"([1-3A-Z][a-z][a-z] )(\d{1,3}\:\d{1,3})(\-)(\d{1,3})"
+        match1 = re.search(pattern1, ref1)
+        pattern2 = r"(\d{1,3})"
+        match2 = re.search(pattern2, ref2)
+        if match1 and match2:
+            book_with_space = match1.group(1)
+            ref1_chapter = match1.group(2)
+            ref2_chapter = match2.group(1)
+            verse_counts = get_verse_counts()  # TODO: Avoid calling multiple times
+            verses = verse_counts[f"{book_with_space}{ref2_chapter}"]
+            return f"{book_with_space}{ref1_chapter}-{ref2_chapter}:{verses}"
 
-            else:
-                pattern = r"([1-3A-Z][a-z][a-z] )(\d{1,3})(\:)(\d{1,3})(\-)(\d{1,3}) ([1-3A-Z][a-z][a-z] )(\d{1,3})(\:)(\d{1,3})(\-)(\d{1,3})"
-                match = re.search(pattern, f"{ref1} {ref2}")
-                if (
-                    match
-                    and (match.group(1) == match.group(6))
-                    and (match.group(2) == match.group(7))
-                ):
-                    book_with_space = match1.group(1)
-                    ref1_chapter = match1.group(2)
-                    ref2_chapter = match2.group(1)
-                    return ref1 + "-" + ref2
-                else:
-                    return ref1 + "-" + ref2
+        pattern = r"([1-3A-Z][a-z][a-z] )(\d{1,3})(\:)(\d{1,3})(\-)(\d{1,3}) ([1-3A-Z][a-z][a-z] )(\d{1,3})(\:)(\d{1,3})(\-)(\d{1,3})"
+        match = re.search(pattern, f"{ref1} {ref2}")
+        if (
+            match
+            and (match.group(1) == match.group(6))
+            and (match.group(2) == match.group(7))
+        ):
+            book_with_space = match1.group(1)
+            ref1_chapter = match1.group(2)
+            ref2_chapter = match2.group(1)
+            return ref1 + "-" + ref2
+        return ref1 + "-" + ref2
 
         # TODO: Refactor above to properly merge other OT split chapter refs.
         # For now, just hand-tweak them in any output files

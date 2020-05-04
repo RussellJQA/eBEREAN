@@ -51,7 +51,7 @@ def DailyOTDuo(daily_readings, year):
         ]  # Split (when needed) 1-4 of the 4 longest OT chapters
         #    (excluding Psalms and Solomon's writings)
 
-        for i in range(get_num_extra_readings()):
+        for _ in range(get_num_extra_readings()):
             substitution = substitutions.pop(0)
             index = readings.index(substitution[0])
             readings[index : index + 1] = substitution[1]
