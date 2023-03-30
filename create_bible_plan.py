@@ -1,6 +1,6 @@
 import calendar
 import datetime
-import json
+# import json
 import os
 import re
 
@@ -17,7 +17,7 @@ def get_weekday_delta(date):
     day_of_week = date.strftime("%a")
     if day_of_week == "Fri":
         return 3
-    if day_of_week == "Sat":
+    elif day_of_week == "Sat":
         return 2
     return 1
 
@@ -44,14 +44,14 @@ def print_daily_reading(cal_date, previous_month, full_refs, readings_file):
 
     # TODO: Refactor to add additional output formats, such as CSV or TSV; HTML; and RTF
 
-    month = cal_date[0:2]
+    month = cal_date[:2]
     if month != previous_month:  # Month changed
         month_header = f"\n\t{calendar.month_name[int(month)]} 2020\n"
         print(month_header)
         readings_file.write(f"{month_header}\n")
         previous_month = month
 
-    daily_reading = "□ " + cal_date[3:] + ": " + ", ".join(full_refs)
+    daily_reading = f"□ {cal_date[3:]}: {', '.join(full_refs)}"
     # □ 28 Mon: Psa 149:6-9, Rev 19, Zec 11-12
     print(daily_reading)
     readings_file.write(f"{daily_reading}\n")
@@ -68,7 +68,7 @@ def process_reading(
     daily_readings, date, book_abbr, reference, datedelta, merge_refs=False
 ):
     cal_date = date.strftime("%m/%d %a")
-    full_ref = book_abbr + " " + reference
+    full_ref = f"{book_abbr} {reference}"
 
     def merge_2_refs(ref1, ref2):
 
@@ -119,7 +119,7 @@ def process_reading(
 
     def do_merge_refs():
         last_full_ref = daily_readings[cal_date][-1]
-        last_book_abbr = last_full_ref[0 : last_full_ref.find(" ")]
+        last_book_abbr = last_full_ref[:last_full_ref.find(" ")]
         # Concatenate new reference to old reference, with a dash separating
 
         if last_book_abbr == book_abbr:
@@ -127,8 +127,8 @@ def process_reading(
             read_fn = os.path.join(
                 bible_metadata_folder, "verse_counts_by_chapter.json"
             )
-            with open(read_fn, "r") as read_file:
-                verse_counts_by_chapter = json.load(read_file)
+            with open(read_fn, "r", encoding="utf-8") as read_file:
+                # verse_counts_by_chapter = json.load(read_file)
                 # print(verse_counts_by_chapter)
 
                 daily_readings[cal_date][-1] = merge_2_refs(
@@ -136,7 +136,7 @@ def process_reading(
                 )
 
         else:
-            daily_readings[cal_date][-1] += "-" + full_ref
+            daily_readings[cal_date][-1] += f"-{full_ref}"
             # Concatenate new full_ref to old full_ref, with a dash separating
 
     if cal_date in daily_readings:

@@ -74,7 +74,7 @@ bible_books = {
 def main():
     bible_metadata_folder = os.path.join(os.getcwd(), "BibleMetaData")
     with open(
-        os.path.join(bible_metadata_folder, r"bible_books.json"), "w"
+        os.path.join(bible_metadata_folder, "bible_books.json"), "w", encoding="utf-8"
     ) as write_file:
         json.dump(bible_books, write_file, indent=4)
 

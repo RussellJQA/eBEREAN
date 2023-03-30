@@ -12,12 +12,11 @@ def create_bible_plan_playlists(cal_date, full_refs, m3u_ext="m3u"):
     An .m3u8 file is essentially the same as an .m3u file, but it's UTF-8 encoded.
     .m3u was chosen as the default extension since some platforms don't support .m3u8.
     """
-
     def get_book_chapter_verse(reference):
 
-        book_abbr = reference[0:3]
+        book_abbr = reference[:3]
         book_number_and_name = book_numbers_and_names[book_abbr]
-        book_num = book_number_and_name[0:2]
+        book_num = book_number_and_name[:2]
         chapter_verse_ref = reference[4:].zfill(3 if book_num <= "39" else 2)
         return (book_abbr, book_number_and_name, book_num, chapter_verse_ref)
 
@@ -26,14 +25,12 @@ def create_bible_plan_playlists(cal_date, full_refs, m3u_ext="m3u"):
     book_num = 0
     for (book_name, (book_abbrev, _)) in bible_books.items():
         book_num += 1  # "1 Thessalonians" => 52
-        book_number_and_name = (
-            (str(book_num)).zfill(2) + "_" + (book_name.replace(" ", "-").casefold())
-        )
+        book_number_and_name = f"{(str(book_num)).zfill(2)}_{book_name.replace(' ', '-').casefold()}"
         # "1 Thessalonians" => "52_1-thessalonians"
         book_numbers_and_names[book_abbrev] = book_number_and_name
 
-    readings_for = cal_date[0:2] + cal_date[3:5] + cal_date[6:9]
-    with open(readings_for + "." + m3u_ext, "w") as write_file:
+    readings_for = cal_date[:2] + cal_date[3:5] + cal_date[6:9]
+    with open(f"{readings_for}.{m3u_ext}", "w", encoding="utf-8") as write_file:
         write_file.write("#EXTM3U\n")
         for full_ref in full_refs:
 
@@ -58,11 +55,10 @@ def create_bible_plan_playlists(cal_date, full_refs, m3u_ext="m3u"):
                     chapter_verse_ref,
                 ) = get_book_chapter_verse(match.group(1))
 
-                reading = book_number_and_name + "_" + chapter_verse_ref
-                write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
-                write_file.write(
-                    mp3_path + book_number_and_name + "/" + reading + ".mp3\n"
-                )
+                reading = f"{book_number_and_name}'_'{chapter_verse_ref}"
+                write_file.write(f"#EXTINF:-1,unknown - {reading}\n")
+                write_file.write(mp3_path + book_number_and_name + "/" +
+                                 reading + ".mp3\n")
 
                 # Handle 2nd reference of exactly 1 chapter
                 (
@@ -72,11 +68,10 @@ def create_bible_plan_playlists(cal_date, full_refs, m3u_ext="m3u"):
                     chapter_verse_ref,
                 ) = get_book_chapter_verse(match.group(3))
 
-                reading = book_number_and_name + "_" + chapter_verse_ref
-                write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
-                write_file.write(
-                    mp3_path + book_number_and_name + "/" + reading + ".mp3\n"
-                )
+                reading = f"{book_number_and_name}'_'{chapter_verse_ref}"
+                write_file.write(f"#EXTINF:-1,unknown - {reading}\n")
+                write_file.write(mp3_path + book_number_and_name + "/" +
+                                 reading + ".mp3\n")
 
             else:  # full_ref only contains references within the same book
 
@@ -100,15 +95,17 @@ def create_bible_plan_playlists(cal_date, full_refs, m3u_ext="m3u"):
                 match2 = re.search(pattern2, full_ref)
 
                 if match1 or match2:
-                    start_chapter = int(match1.group(2) if match1 else match2.group(2))
-                    end_chapter = int(match1.group(4) if match1 else match2.group(4))
+                    start_chapter = int(
+                        match1.group(2) if match1 else match2.group(2))
+                    end_chapter = int(
+                        match1.group(4) if match1 else match2.group(4))
                     for chapter in range(start_chapter, end_chapter + 1):
-                        chapter_ref = (str(chapter)).zfill(3 if book_num <= "39" else 2)
-                        reading = book_number_and_name + "_" + chapter_ref
-                        write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
-                        write_file.write(
-                            mp3_path + book_number_and_name + "/" + reading + ".mp3\n"
-                        )
+                        chapter_ref = (
+                            str(chapter)).zfill(3 if book_num <= "39" else 2)
+                        reading = f"{book_number_and_name}_{chapter_ref}"
+                        write_file.write(f"#EXTINF:-1,unknown - {reading}" + "\n")
+                        write_file.write(mp3_path + book_number_and_name +
+                                         "/" + reading + ".mp3\n")
                 else:
                     pattern = r"(\d{1,3})(:\d{1,3}-\d{1,3})"
                     match = re.search(pattern, chapter_verse_ref)
@@ -116,15 +113,14 @@ def create_bible_plan_playlists(cal_date, full_refs, m3u_ext="m3u"):
                         # Handle partial chapters: Psa 78:1-37, Psa 119:1-24,
                         #   Pro 8:1-18, Mat 26:1-35, Luk 1:39-80, etc.
                         # by omitting verse references (Psa 119:1-24 -> 19_psalms_119)
-                        chapter_ref = (match.group(1)).zfill(
-                            3 if book_num <= "39" else 2
-                        )
-                        reading = book_number_and_name + "_" + chapter_ref
+                        chapter_ref = (
+                            match.group(1)).zfill(3 if book_num <= "39" else 2)
+                        reading = f"{book_number_and_name}_{chapter_ref}"
                     else:
                         # Handle readings of 1 full chapter:
                         #   "Psa 1" -> "19_psalm_1"
                         #   "Mat 1" -> "40_matthew_1"
-                        reading = book_number_and_name + "_" + chapter_verse_ref
+                        reading = f"{book_number_and_name}_{chapter_verse_ref}"
 
                         # TODO: Still need to properly handle readings w. mixed references:
                         #   Psa 105:38-45;106:1-13, Psa 117;118:1-14, Psa 133;134;135:1-12, etc.
@@ -134,21 +130,20 @@ def create_bible_plan_playlists(cal_date, full_refs, m3u_ext="m3u"):
                         #   then handle each piece of the reference separately
                         #   (Use functions to to handle the different types of references.)
 
-                    write_file.write("#EXTINF:-1,unknown - " + reading + "\n")
-                    write_file.write(
-                        mp3_path + book_number_and_name + "/" + reading + ".mp3\n"
-                    )
+                    write_file.write(f"#EXTINF:-1,unknown - {reading}" + "\n")
+                    write_file.write(mp3_path + book_number_and_name + "/" +
+                                     reading + ".mp3\n")
 
         write_file.write("#EXTINF:244,<unknown")
 
 
 # Example of a similar MP3 playlist taken from my Nexus 6P:
-comment = """
+COMMENT = """
 #EXTM3U
 #EXTINF:-1,unknown - 19_psalms_002
 /storage/emulated/0/Music/Bible-Audio/19_psalms/19_psalms_002.mp3
-#EXTINF:-1,unknown - 40_Matthew_03
-/storage/emulated/0/Music/Bible-Audio/40_matthew/40_Matthew_03.mp3
+#EXTINF:-1,unknown - 40_matthew_03
+/storage/emulated/0/Music/Bible-Audio/40_matthew/40_matthew_03.mp3
 #EXTINF:237,<unknown> - 01_genesis_005
 /storage/emulated/0/Music/Bible-Audio/01_genesis/01_genesis_005.mp3
 #EXTINF:244,<unknown

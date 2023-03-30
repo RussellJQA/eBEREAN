@@ -59,7 +59,7 @@ def calc_and_write_book_abbrevs():
             # Strip unwanted initial Unicode character, etc.
             book_abbrevs[book_abbr] = full_book_name
 
-    with open(r"BibleMetaData\book_abbreviations.json", "w") as write_file:
+    with open(r"BibleMetaData\book_abbreviations.json", "w", encoding="utf-8") as write_file:
         json.dump(book_abbrevs, write_file, indent=4)
 
     return book_abbrevs
@@ -70,7 +70,7 @@ def calc_and_write_book_nums(book_abbrevs):
     book_nums = {}
     for book_num, abbrev in enumerate(book_abbrevs.keys(), start=1):
         book_nums[abbrev] = book_num
-    with open(r"BibleMetaData\book_numbers.json", "w") as write_file:
+    with open(r"BibleMetaData\book_numbers.json", "w", encoding="utf-8") as write_file:
         json.dump(book_nums, write_file, indent=4)
 
 
@@ -84,14 +84,14 @@ def calc_verse_data(chapter_file, lines):
     # Remove leading '0's (as from '01' and '001') and trailing '_'s (as from '01_')
 
     # Calculate verse counts
-    full_ref = book_abbr + " " + chapter_number
+    full_ref = f"{book_abbr} {chapter_number}"
     verse_count = len(lines) - 2  # Exclude lines[0] and lines [1]
     return (full_ref, verse_count)
 
 
 def calc_and_write_verse_counts_by_desc_count(verse_counts_by_chapter):
 
-    with open(r"BibleMetaData\verse_counts_by_chapter.json", "w") as write_file:
+    with open(r"BibleMetaData\verse_counts_by_chapter.json", "w", encoding="utf-8") as write_file:
         json.dump(verse_counts_by_chapter, write_file, indent=4)
 
     # Calculate verse_counts_by_count by summing from verse_counts_by_chapter
@@ -106,7 +106,7 @@ def calc_and_write_verse_counts_by_desc_count(verse_counts_by_chapter):
     #   verse_counts_by_count, sorted by decreasing verse count
     for verse_count, full_refs in sorted(verse_counts_by_count.items(), reverse=True):
         verse_counts_by_desc_count[verse_count] = full_refs
-    with open(r"BibleMetaData\verse_counts_by_desc_count.json", "w") as write_file:
+    with open(r"BibleMetaData\verse_counts_by_desc_count.json", "w", encoding="utf-8") as write_file:
         json.dump(verse_counts_by_desc_count, write_file, indent=4)
 
 
@@ -130,13 +130,14 @@ def main():
     # sorted() because glob() may return the list in an arbitrary order
 
     for chapter_file in kjv_chapter_files:
-        read_file = open(chapter_file, "r", encoding="utf-8")
-        lines = read_file.readlines()
-        # There's no need to exclude the blank line at the end of chapter files,
-        # since readlines() already seems to ignore it.
+        if "000_000_000" not in chapter_file:
+            read_file = open(chapter_file, "r", encoding="utf-8")
+            lines = read_file.readlines()
+            # There's no need to exclude the blank line at the end of chapter files,
+            # since readlines() already seems to ignore it.
 
-        (full_ref, verse_count) = calc_verse_data(chapter_file, lines)
-        verse_counts_by_chapter[full_ref] = verse_count
+            (full_ref, verse_count) = calc_verse_data(chapter_file, lines)
+            verse_counts_by_chapter[full_ref] = verse_count
 
     calc_and_write_verse_counts_by_desc_count(verse_counts_by_chapter)
 

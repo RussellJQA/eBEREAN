@@ -6,7 +6,7 @@ A consolidation of several Bible Reading plans:
 
 from lib.bible_books import bible_books
 
-from create_bible_plan import create_plan_with_playlists, process_reading
+from create_bible_plan import create_plan_with_playlists
 
 from WeekdayNT import WeekdayNT
 from WeeklySolomon import WeeklySolomon

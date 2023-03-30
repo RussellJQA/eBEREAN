@@ -45,13 +45,13 @@ def WeekdayNT(daily_readings, year):  # Weekday New Testament
         ]:
             book_abbr, book_chapters = bible_books[book]
             for chapter in range(1, book_chapters + 1):
-                readings.append(book_abbr + " " + str(chapter))
+                readings.append(f"{book_abbr} {str(chapter)}")
 
         substitutions = [
             ["Luk 1", ["Luk 1:1-38", "Luk 1:39-80"]],
             ["Mat 26", ["Mat 26:1-35", "Mat 26:36-75"]],
         ]  # Split (when needed) 1 or 2 of the 2 longest NT chapters
-        for i in range(get_num_extra_readings()):
+        for _ in range(get_num_extra_readings()):
             substitution = substitutions.pop(0)
             index = readings.index(substitution[0])
             readings[index : index + 1] = substitution[1]

@@ -41,7 +41,7 @@ def DailyOTDuo(daily_readings, year):
         for book in ot_without_psalms_and_solomon:
             book_abbr, book_chapters = bible_books[book]
             for chapter in range(1, book_chapters + 1):
-                readings.append(book_abbr + " " + str(chapter))
+                readings.append(f"{book_abbr} {str(chapter)}")
 
         substitutions = [
             ["Num 7", ["Num 7:1-47", "Num 7:48-89"]],
